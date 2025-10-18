@@ -303,27 +303,35 @@ class 熵源生成器:
         try:
             系统熵 = os.urandom(64)
             self.熵池.添加熵("系统CSPRNG", 系统熵)
+            print("✓ 系统熵收集成功")
         except NotImplementedError:
-            print("警告: 当前系统不支持os.urandom，无法获取系统随机熵")
+            print("✗ 警告: 当前系统不支持os.urandom，无法获取系统随机熵")
+        except Exception as e:
+            print(f"✗ 系统熵收集失败: {str(e)}")
     
     def 收集Python安全熵(self) -> None:
         """从Python的secrets模块收集熵"""
         try:
             安全熵 = secrets.token_bytes(64)
             self.熵池.添加熵("Python_secrets", 安全熵)
-        except Exception:
-            print("警告: 无法从Python的secrets模块获取熵")
+            print("✓ Python安全熵收集成功")
+        except Exception as e:
+            print(f"✗ 警告: 无法从Python的secrets模块获取熵: {str(e)}")
     
     def 收集时间熵(self) -> None:
         """从高精度时间收集熵（弱熵源，仅作为补充）"""
-        时间哈希 = hashlib.sha256()
-        
-        # 收集多个时间点以增加熵
-        for _ in range(10):
-            时间哈希.update(str(time.time_ns()).encode())
-            time.sleep(0.01)  # 微小延迟以获取不同时间
-        
-        self.熵池.添加熵("时间熵", 时间哈希.digest())
+        try:
+            时间哈希 = hashlib.sha256()
+            
+            # 收集多个时间点以增加熵
+            for _ in range(10):
+                时间哈希.update(str(time.time_ns()).encode())
+                time.sleep(0.01)  # 微小延迟以获取不同时间
+            
+            self.熵池.添加熵("时间熵", 时间哈希.digest())
+            print("✓ 时间熵收集成功")
+        except Exception as e:
+            print(f"✗ 时间熵收集失败: {str(e)}")
     
     def 收集硬件熵(self) -> None:
         """尝试从硬件随机源收集熵"""
@@ -333,13 +341,18 @@ class 熵源生成器:
                 with open('/dev/hwrng', 'rb') as f:
                     硬件熵 = f.read(64)
                     self.熵池.添加熵("硬件RNG", 硬件熵)
+                    print("✓ 硬件随机源熵收集成功")
+                    return
             # 尝试读取/dev/random (高质量熵池)
             elif os.path.exists('/dev/random'):
                 with open('/dev/random', 'rb') as f:
                     随机设备熵 = f.read(64)
                     self.熵池.添加熵("dev_random", 随机设备熵)
-        except:
-            pass
+                    print("✓ /dev/random熵收集成功")
+                    return
+            print("✗ 未找到硬件随机源，跳过此熵源")
+        except Exception as e:
+            print(f"✗ 硬件熵收集失败: {str(e)}")
     
     def 收集计算熵(self) -> None:
         """通过计算密集型操作生成熵"""
@@ -355,8 +368,9 @@ class 熵源生成器:
             计算熵.update(str(私钥.private_numbers().d).encode())
             
             self.熵池.添加熵("计算熵", 计算熵.digest())
-        except:
-            pass
+            print("✓ 计算熵收集成功")
+        except Exception as e:
+            print(f"✗ 计算熵收集失败: {str(e)}")
     
     def 收集用户熵(self, 用户输入: str = None) -> None:
         """
@@ -365,13 +379,19 @@ class 熵源生成器:
         参数:
             用户输入: 用户提供的熵字符串，如果为None则提示用户输入
         """
-        if 用户输入 is None:
-            print("\n为增强随机性，请输入一些随机字符（按回车结束）:")
-            用户输入 = getpass.getpass("（输入内容不会显示）: ")
-        
-        if 用户输入:
-            用户熵 = hashlib.sha256(用户输入.encode()).digest()
-            self.熵池.添加熵("用户输入", 用户熵)
+        try:
+            if 用户输入 is None:
+                print("\n为增强随机性，请输入一些随机字符（按回车结束）:")
+                用户输入 = getpass.getpass("（输入内容不会显示）: ")
+            
+            if 用户输入:
+                用户熵 = hashlib.sha256(用户输入.encode()).digest()
+                self.熵池.添加熵("用户输入", 用户熵)
+                print("✓ 用户熵收集成功")
+            else:
+                print("✗ 未提供用户输入，跳过此熵源")
+        except Exception as e:
+            print(f"✗ 用户熵收集失败: {str(e)}")
     
     def 收集所有可用熵(self, 包含用户熵: bool = True) -> None:
         """
@@ -380,14 +400,39 @@ class 熵源生成器:
         参数:
             包含用户熵: 是否包含用户输入的熵
         """
+        # 显示熵池状态
+        熵池状态 = self.获取熵池状态()
+        print(f"熵池状态: {熵池状态['熵池健康度']}% ({熵池状态['熵源数量']}/{ENTROPY_SOURCES_REQUIRED}个熵源)")
+        print(f"已添加熵源: {', '.join(熵池状态['已添加熵源'])}")
+        
+        # 收集系统熵
+        print("正在收集系统熵...")
         self.收集系统熵()
+        
+        # 收集Python安全熵
+        print("正在收集Python安全熵...")
         self.收集Python安全熵()
+        
+        # 收集时间熵
+        print("正在收集时间熵...")
         self.收集时间熵()
+        
+        # 收集硬件熵
+        print("正在尝试收集硬件熵...")
         self.收集硬件熵()
+        
+        # 收集计算熵
+        print("正在生成计算熵...")
         self.收集计算熵()
         
+        # 收集用户熵
         if 包含用户熵:
             self.收集用户熵()
+        
+        # 再次显示熵池状态
+        熵池状态 = self.获取熵池状态()
+        print(f"熵池状态: {熵池状态['熵池健康度']}% ({熵池状态['熵源数量']}/{ENTROPY_SOURCES_REQUIRED}个熵源)")
+        print(f"已添加熵源: {', '.join(熵池状态['已添加熵源'])}")
     
     def 获取熵(self, 字节数: int) -> bytes:
         """
@@ -401,8 +446,19 @@ class 熵源生成器:
         """
         # 确保熵池健康
         if not self.熵池.熵池是否健康():
-            print("警告: 熵池不够健康，正在收集更多熵...")
+            print("\n警告: 熵池不够健康，正在收集更多熵...")
             self.收集所有可用熵(包含用户熵=True)
+            
+            # 再次检查熵池健康状态
+            if not self.熵池.熵池是否健康():
+                print("\n严重警告: 熵池仍然不够健康，但将继续生成。")
+                print("生成的助记词可能不具备足够的随机性和安全性。")
+                print("建议取消操作，检查系统随机源后重试。")
+                
+                # 询问用户是否继续
+                继续操作 = input("\n是否仍要继续生成? (y/n): ").lower()
+                if 继续操作 not in ['y', 'yes', '是']:
+                    raise ValueError("用户取消了操作")
         
         return self.熵池.获取熵(字节数)
     
