@@ -183,15 +183,15 @@ check_dependencies() {
     echo -e "${BLUE}正在检查依赖库...${NC}"
     
     # 尝试使用依赖管理器
-    if python3 -c "import sys; sys.path.insert(0, '.'); try: from utils.dependency_manager import 依赖管理器; print('DEPENDENCY_MANAGER_AVAILABLE'); except: print('DEPENDENCY_MANAGER_NOT_AVAILABLE')" 2>/dev/null | grep -q "DEPENDENCY_MANAGER_AVAILABLE"; then
+    if python3 -c "import sys; sys.path.insert(0, '$(pwd)'); try: from utils.dependency_manager import 依赖管理器; print('DEPENDENCY_MANAGER_AVAILABLE'); except Exception as e: print(f'DEPENDENCY_MANAGER_NOT_AVAILABLE: {e}');" 2>/dev/null | grep -q "DEPENDENCY_MANAGER_AVAILABLE"; then
         echo -e "${GREEN}使用依赖管理器检查依赖...${NC}"
         
         # 显示依赖状态
-        python3 -c "import sys; sys.path.insert(0, '.'); from utils.dependency_manager import 依赖管理器; print(依赖管理器.显示依赖状态())"
+        python3 -c "import sys; sys.path.insert(0, '$(pwd)'); from utils.dependency_manager import 依赖管理器; print(依赖管理器.显示依赖状态())"
         
         # 检查安全必需依赖
         安全依赖已安装=0
-        python3 -c "import sys; sys.path.insert(0, '.'); from utils.dependency_manager import 依赖管理器; 安全依赖已安装, 缺失安全依赖 = 依赖管理器.检查安全必需依赖(); print('SECURITY_DEPS_INSTALLED' if 安全依赖已安装 else 'SECURITY_DEPS_MISSING'); print(','.join(缺失安全依赖) if not 安全依赖已安装 else '')" > /tmp/security_deps_status
+        python3 -c "import sys; sys.path.insert(0, '$(pwd)'); from utils.dependency_manager import 依赖管理器; 安全依赖已安装, 缺失安全依赖 = 依赖管理器.检查安全必需依赖(); print('SECURITY_DEPS_INSTALLED' if 安全依赖已安装 else 'SECURITY_DEPS_MISSING'); print(','.join(缺失安全依赖) if not 安全依赖已安装 else '')" > /tmp/security_deps_status
         
         if grep -q "SECURITY_DEPS_MISSING" /tmp/security_deps_status; then
             缺失安全依赖=$(grep -v "SECURITY_DEPS_MISSING" /tmp/security_deps_status)
@@ -202,10 +202,10 @@ check_dependencies() {
             
             if [[ "$install_security_deps" =~ ^[Yy]$ ]]; then
                 echo -e "${BLUE}正在安装安全必需依赖...${NC}"
-                python3 -c "import sys; sys.path.insert(0, '.'); from utils.dependency_manager import 依赖管理器; 依赖管理器.安装安全必需依赖(True)"
+                python3 -c "import sys; sys.path.insert(0, '$(pwd)'); from utils.dependency_manager import 依赖管理器; 依赖管理器.安装安全必需依赖(True)"
                 
                 # 再次检查安全依赖
-                python3 -c "import sys; sys.path.insert(0, '.'); from utils.dependency_manager import 依赖管理器; 安全依赖已安装, _ = 依赖管理器.检查安全必需依赖(); print('SECURITY_DEPS_INSTALLED' if 安全依赖已安装 else 'SECURITY_DEPS_STILL_MISSING')" > /tmp/security_deps_status
+                python3 -c "import sys; sys.path.insert(0, '$(pwd)'); from utils.dependency_manager import 依赖管理器; 安全依赖已安装, _ = 依赖管理器.检查安全必需依赖(); print('SECURITY_DEPS_INSTALLED' if 安全依赖已安装 else 'SECURITY_DEPS_STILL_MISSING')" > /tmp/security_deps_status
                 
                 if grep -q "SECURITY_DEPS_STILL_MISSING" /tmp/security_deps_status; then
                     echo -e "${RED}错误: 无法安装安全必需依赖。${NC}"
@@ -234,11 +234,11 @@ check_dependencies() {
             
             # 安装依赖
             if [ "$req_file" = "requirements.txt" ]; then
-                python3 -c "import sys; sys.path.insert(0, '.'); from utils.dependency_manager import 依赖管理器; 依赖管理器.安装所有基础依赖(True)"
+                python3 -c "import sys; sys.path.insert(0, '$(pwd)'); from utils.dependency_manager import 依赖管理器; 依赖管理器.安装所有基础依赖(True)"
             elif [ "$req_file" = "requirements_secure.txt" ]; then
-                python3 -c "import sys; sys.path.insert(0, '.'); from utils.dependency_manager import 依赖管理器; 依赖管理器.安装所有依赖(True)"
+                python3 -c "import sys; sys.path.insert(0, '$(pwd)'); from utils.dependency_manager import 依赖管理器; 依赖管理器.安装所有依赖(True)"
             else
-                python3 -c "import sys; sys.path.insert(0, '.'); from utils.dependency_manager import 依赖管理器; 依赖管理器.从文件安装依赖('$req_file', True)"
+                python3 -c "import sys; sys.path.insert(0, '$(pwd)'); from utils.dependency_manager import 依赖管理器; 依赖管理器.从文件安装依赖('$req_file', True)"
             fi
             
             install_missing=1
@@ -392,24 +392,24 @@ show_menu() {
             
             case $dep_choice in
                 1)
-                    if python3 -c "import sys; sys.path.insert(0, '.'); try: from utils.dependency_manager import 依赖管理器; print('DEPENDENCY_MANAGER_AVAILABLE'); except: print('DEPENDENCY_MANAGER_NOT_AVAILABLE')" 2>/dev/null | grep -q "DEPENDENCY_MANAGER_AVAILABLE"; then
-                        python3 -c "import sys; sys.path.insert(0, '.'); from utils.dependency_manager import 依赖管理器; 依赖管理器.安装所有基础依赖(True)"
+                    if python3 -c "import sys; sys.path.insert(0, '$(pwd)'); try: from utils.dependency_manager import 依赖管理器; print('DEPENDENCY_MANAGER_AVAILABLE'); except Exception as e: print(f'DEPENDENCY_MANAGER_NOT_AVAILABLE: {e}');" 2>/dev/null | grep -q "DEPENDENCY_MANAGER_AVAILABLE"; then
+                        python3 -c "import sys; sys.path.insert(0, '$(pwd)'); from utils.dependency_manager import 依赖管理器; 依赖管理器.安装所有基础依赖(True)"
                     else
                         pip3 install -r requirements.txt
                     fi
                     echo -e "${GREEN}基础版本依赖安装完成！${NC}"
                     ;;
                 2)
-                    if python3 -c "import sys; sys.path.insert(0, '.'); try: from utils.dependency_manager import 依赖管理器; print('DEPENDENCY_MANAGER_AVAILABLE'); except: print('DEPENDENCY_MANAGER_NOT_AVAILABLE')" 2>/dev/null | grep -q "DEPENDENCY_MANAGER_AVAILABLE"; then
-                        python3 -c "import sys; sys.path.insert(0, '.'); from utils.dependency_manager import 依赖管理器; 依赖管理器.安装所有依赖(True)"
+                    if python3 -c "import sys; sys.path.insert(0, '$(pwd)'); try: from utils.dependency_manager import 依赖管理器; print('DEPENDENCY_MANAGER_AVAILABLE'); except Exception as e: print(f'DEPENDENCY_MANAGER_NOT_AVAILABLE: {e}');" 2>/dev/null | grep -q "DEPENDENCY_MANAGER_AVAILABLE"; then
+                        python3 -c "import sys; sys.path.insert(0, '$(pwd)'); from utils.dependency_manager import 依赖管理器; 依赖管理器.安装所有依赖(True)"
                     else
                         pip3 install -r requirements_secure.txt
                     fi
                     echo -e "${GREEN}高安全标准版本依赖安装完成！${NC}"
                     ;;
                 3)
-                    if python3 -c "import sys; sys.path.insert(0, '.'); try: from utils.dependency_manager import 依赖管理器; print('DEPENDENCY_MANAGER_AVAILABLE'); except: print('DEPENDENCY_MANAGER_NOT_AVAILABLE')" 2>/dev/null | grep -q "DEPENDENCY_MANAGER_AVAILABLE"; then
-                        python3 -c "import sys; sys.path.insert(0, '.'); from utils.dependency_manager import 依赖管理器; 依赖管理器.安装所有依赖(True)"
+                    if python3 -c "import sys; sys.path.insert(0, '$(pwd)'); try: from utils.dependency_manager import 依赖管理器; print('DEPENDENCY_MANAGER_AVAILABLE'); except Exception as e: print(f'DEPENDENCY_MANAGER_NOT_AVAILABLE: {e}');" 2>/dev/null | grep -q "DEPENDENCY_MANAGER_AVAILABLE"; then
+                        python3 -c "import sys; sys.path.insert(0, '$(pwd)'); from utils.dependency_manager import 依赖管理器; 依赖管理器.安装所有依赖(True)"
                     else
                         pip3 install -r requirements.txt
                         pip3 install -r requirements_secure.txt
