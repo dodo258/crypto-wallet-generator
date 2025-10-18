@@ -55,7 +55,7 @@ class 版本检查器:
             请求.add_header("User-Agent", "CryptoWalletGenerator")
             
             # 发送请求
-            with urllib.request.urlopen(请求, timeout=5) as 响应:
+            with urllib.request.urlopen(请求, timeout=10) as 响应:
                 数据 = json.loads(响应.read().decode("utf-8"))
             
             # 提取版本信息
@@ -65,7 +65,7 @@ class 版本检查器:
             发布URL = 数据.get("html_url", "")
             
             return {
-                "版本": 标签名,
+                "版本": 标签名 or 版本检查器.当前版本,
                 "名称": 发布名,
                 "说明": 发布说明,
                 "URL": 发布URL,
@@ -73,14 +73,35 @@ class 版本检查器:
             }
         except (urllib.error.URLError, json.JSONDecodeError, KeyError) as e:
             print(f"获取最新版本信息时出错: {str(e)}")
-            return {
-                "版本": 版本检查器.当前版本,
-                "名称": "未知",
-                "说明": "",
-                "URL": "",
-                "检查时间": time.time(),
-                "错误": str(e)
-            }
+            # 如果API调用失败，尝试直接检查仓库页面
+            try:
+                # 构建仓库URL
+                repo_url = f"https://github.com/{版本检查器.仓库所有者}/{版本检查器.仓库名称}"
+                
+                # 创建请求
+                请求 = urllib.request.Request(repo_url)
+                请求.add_header("User-Agent", "CryptoWalletGenerator")
+                
+                # 发送请求
+                with urllib.request.urlopen(请求, timeout=10) as 响应:
+                    # 如果能访问仓库页面，至少返回当前版本
+                    return {
+                        "版本": 版本检查器.当前版本,
+                        "名称": "当前版本",
+                        "说明": "无法获取最新版本信息，但仓库可访问。",
+                        "URL": repo_url,
+                        "检查时间": time.time()
+                    }
+            except:
+                # 如果连仓库页面都无法访问，返回错误信息
+                return {
+                    "版本": 版本检查器.当前版本,
+                    "名称": "未知",
+                    "说明": "",
+                    "URL": "",
+                    "检查时间": time.time(),
+                    "错误": str(e)
+                }
     
     @staticmethod
     def 保存版本缓存(版本信息: Dict[str, Any]) -> None:
@@ -138,6 +159,10 @@ class 版本检查器:
             最新版本信息 = 版本检查器.获取最新版本()
             # 保存到缓存
             版本检查器.保存版本缓存(最新版本信息)
+        
+        # 如果有错误，则认为没有更新
+        if "错误" in 最新版本信息:
+            return False, 最新版本信息
         
         # 比较版本
         当前版本元组 = 版本检查器.解析版本号(版本检查器.当前版本)
