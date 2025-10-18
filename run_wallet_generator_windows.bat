@@ -237,14 +237,13 @@ echo.
 echo %BLUE%请选择要使用的版本:%NC%
 echo.
 echo %YELLOW%1. 基础版本%NC% - 简单的命令行工具，支持基本的助记词生成功能 %RED%(建议只生成一次性钱包使用)%NC%
-echo %YELLOW%2. 中文界面版本%NC% - 提供中文交互界面，适合中文用户使用
-echo %YELLOW%3. 高安全标准版本%NC% - 提供多源熵、内存安全处理、SLIP-39分割备份等高级安全特性
-echo %YELLOW%4. 安装依赖%NC% - 安装运行工具所需的依赖库
-echo %YELLOW%5. 检查系统环境%NC% - 检查系统环境并诊断问题
-echo %YELLOW%6. 退出%NC%
+echo %YELLOW%2. 高安全标准版本%NC% - 提供多源熵、内存安全处理、SLIP-39分割备份等高级安全特性
+echo %YELLOW%3. 安装依赖%NC% - 安装运行工具所需的依赖库
+echo %YELLOW%4. 检查系统环境%NC% - 检查系统环境并诊断问题
+echo %YELLOW%5. 退出%NC%
 echo %YELLOW%0. 返回上一步%NC%
 echo.
-echo %BLUE%请输入选项 (0-6):%NC%
+echo %BLUE%请输入选项 (0-5):%NC%
 set /p "choice=>"
 
 if "%choice%"=="0" (
@@ -266,16 +265,11 @@ if "%choice%"=="0" (
     python crypto_wallet_generator.py generate
     goto :end
 ) else if "%choice%"=="2" (
-    call :check_dependencies "requirements.txt"
-    echo %GREEN%启动中文界面版本...%NC%
-    python crypto_wallet_cn_optimized.py
-    goto :end
-) else if "%choice%"=="3" (
     call :check_dependencies "requirements_secure.txt"
     echo %GREEN%启动高安全标准版本...%NC%
     python crypto_wallet_secure_optimized.py
     goto :end
-) else if "%choice%"=="4" (
+) else if "%choice%"=="3" (
     echo %BLUE%请选择要安装的依赖:%NC%
     echo %YELLOW%1. 基础版本依赖%NC%
     echo %YELLOW%2. 高安全标准版本依赖%NC%
@@ -304,14 +298,14 @@ if "%choice%"=="0" (
     echo %YELLOW%按任意键返回主菜单...%NC%
     pause >nul
     goto :show_menu
-) else if "%choice%"=="5" (
+) else if "%choice%"=="4" (
     call :check_system
-    echo %YELLOW%按任意键返回主菜单...%NC%
-    pause >nul
+    echo %YELLOW%按回车键返回主菜单...%NC%
+    pause > nul
     goto :show_menu
-) else if "%choice%"=="6" (
+) else if "%choice%"=="5" (
     echo %GREEN%感谢使用！再见！%NC%
-    exit /b 0
+    goto :eof
 ) else (
     echo %RED%无效选项，请重新选择%NC%
     goto :show_menu

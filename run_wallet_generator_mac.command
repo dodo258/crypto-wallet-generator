@@ -339,15 +339,14 @@ show_menu() {
     echo -e "${BLUE}请选择要使用的版本:${NC}"
     echo ""
     echo -e "${YELLOW}1. 基础版本${NC} - 简单的命令行工具，支持基本的助记词生成功能 ${RED}(建议只生成一次性钱包使用)${NC}"
-    echo -e "${YELLOW}2. 中文界面版本${NC} - 提供中文交互界面，适合中文用户使用"
-    echo -e "${YELLOW}3. 高安全标准版本${NC} - 提供多源熵、内存安全处理、SLIP-39分割备份等高级安全特性"
-    echo -e "${YELLOW}4. 安装依赖${NC} - 安装运行工具所需的依赖库"
-    echo -e "${YELLOW}5. 检查系统环境${NC} - 检查系统环境并诊断问题"
-    echo -e "${YELLOW}6. 检查和修复权限${NC} - 检查和修复文件权限问题"
-    echo -e "${YELLOW}7. 退出${NC}"
+    echo -e "${YELLOW}2. 高安全标准版本${NC} - 提供多源熵、内存安全处理、SLIP-39分割备份等高级安全特性"
+    echo -e "${YELLOW}3. 安装依赖${NC} - 安装运行工具所需的依赖库"
+    echo -e "${YELLOW}4. 检查系统环境${NC} - 检查系统环境并诊断问题"
+    echo -e "${YELLOW}5. 检查和修复权限${NC} - 检查和修复文件权限问题"
+    echo -e "${YELLOW}6. 退出${NC}"
     echo -e "${YELLOW}0. 返回上一步${NC}"
     echo ""
-    echo -e "${BLUE}请输入选项 (0-7):${NC}"
+    echo -e "${BLUE}请输入选项 (0-6):${NC}"
     read -p "> " choice
     
     case $choice in
@@ -371,16 +370,11 @@ show_menu() {
             python3 crypto_wallet_generator.py generate
             ;;
         2)
-            check_dependencies "requirements.txt"
-            echo -e "${GREEN}启动中文界面版本...${NC}"
-            python3 crypto_wallet_cn_optimized.py
-            ;;
-        3)
             check_dependencies "requirements_secure.txt"
             echo -e "${GREEN}启动高安全标准版本...${NC}"
             python3 crypto_wallet_secure_optimized.py
             ;;
-        4)
+        3)
             echo -e "${BLUE}请选择要安装的依赖:${NC}"
             echo -e "${YELLOW}1. 基础版本依赖${NC}"
             echo -e "${YELLOW}2. 高安全标准版本依赖${NC}"
@@ -429,19 +423,19 @@ show_menu() {
             read
             show_menu
             ;;
-        5)
+        4)
             check_system
             echo -e "${YELLOW}按回车键返回主菜单...${NC}"
             read
             show_menu
             ;;
-        6)
+        5)
             check_permissions
             echo -e "${YELLOW}按回车键返回主菜单...${NC}"
             read
             show_menu
             ;;
-        7)
+        6)
             echo -e "${GREEN}感谢使用！再见！${NC}"
             exit 0
             ;;

@@ -178,9 +178,36 @@ def generate(strength: int, language: str, words: Optional[int]):
     try:
         generator = WalletGenerator(language)
         mnemonic = generator.generate_mnemonic(strength)
-        click.echo("\n生成的助记词:")
-        click.echo(f"\n{mnemonic}\n")
-        click.echo(f"语言: {language}")
+        
+        # 显示助记词，使用彩色格式化输出
+        click.echo("\n===== 生成的助记词 =====\n")
+        click.echo("\033[1;32m" + "=" * 60 + "\033[0m")  # 绿色分隔线
+        
+        # 将助记词分成每行3个词
+        mnemonic_list = mnemonic.split()
+        words_per_line = 3
+        num_lines = (len(mnemonic_list) + words_per_line - 1) // words_per_line  # 向上取整
+        
+        # 计算最长词的长度，用于对齐
+        max_word_length = max(len(word) for word in mnemonic_list)
+        
+        for i in range(num_lines):
+            start_index = i * words_per_line
+            end_index = min((i + 1) * words_per_line, len(mnemonic_list))
+            current_line_words = mnemonic_list[start_index:end_index]
+            
+            # 构建带序号和对齐的行
+            line_text = ""
+            for j, word in enumerate(current_line_words):
+                word_num = start_index + j + 1
+                # 使用左对齐确保词语对齐
+                line_text += f"{word_num:2d}. {word:<{max_word_length}}  "
+            
+            # 使用黄色加粗显示
+            click.echo("\033[1;33m" + line_text.rstrip() + "\033[0m")
+        
+        click.echo("\033[1;32m" + "=" * 60 + "\033[0m")  # 绿色分隔线
+        click.echo(f"\n语言: {language}")
         click.echo(f"词数: {len(mnemonic.split())}")
         click.echo("\n警告: 请将助记词安全保存，任何人获取到助记词将可以控制您的加密资产！")
     except Exception as e:
