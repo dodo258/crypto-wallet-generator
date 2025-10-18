@@ -3,14 +3,14 @@ chcp 65001 >nul
 setlocal enabledelayedexpansion
 
 :: 设置终端颜色
-set "GREEN=[92m"
-set "BLUE=[94m"
-set "YELLOW=[93m"
-set "RED=[91m"
-set "NC=[0m"
+set "GREEN=\033[92m"
+set "BLUE=\033[94m"
+set "YELLOW=\033[93m"
+set "RED=\033[91m"
+set "NC=\033[0m"
 
 :: 版本信息
-set "VERSION=1.2.0"
+set "VERSION=1.3.0"
 
 :: 清屏
 cls
@@ -29,6 +29,9 @@ echo.
 :: 检查Python
 call :check_python
 
+:: 检查系统环境
+call :check_system
+
 :: 运行主菜单
 call :show_menu
 goto :eof
@@ -38,7 +41,7 @@ goto :eof
 echo %BLUE%正在检查更新...%NC%
 
 :: 尝试导入版本检查器模块
-python -c "import sys; sys.path.insert(0, '.'); try: from utils.version_checker import 版本检查器; 有更新, 版本信息 = 版本检查器.检查更新(); print('UPDATE_AVAILABLE' if 有更新 else 'UP_TO_DATE'); except: print('VERSION_CHECKER_NOT_AVAILABLE')" 2>nul | findstr "UPDATE_AVAILABLE" >nul
+python -c "import sys; sys.path.insert(0, '.'); try: from utils.version_checker import 版本检查器; 有更新, 版本信息 = 版本检查器.检查更新(); print('UPDATE_AVAILABLE' if 有更新 else 'UP_TO_DATE'); except Exception as e: print(f'VERSION_CHECKER_NOT_AVAILABLE: {e}')" 2>nul | findstr "UPDATE_AVAILABLE" >nul
 if %ERRORLEVEL% EQU 0 (
     echo %YELLOW%发现新版本!%NC%
     
@@ -75,7 +78,7 @@ if %ERRORLEVEL% EQU 0 (
 
 :: 检查Python
 :check_python
-python --version >nul 2>&1
+where python >nul 2>&1
 if %ERRORLEVEL% NEQ 0 (
     echo %RED%错误: 未找到Python。请先安装Python后再运行此脚本。%NC%
     echo 您可以从 https://www.python.org/downloads/ 下载并安装Python。
@@ -201,42 +204,51 @@ exit /b %install_missing%
 :check_system
 echo %BLUE%正在检查系统环境...%NC%
 
-:: 检查操作系统
-for /f "tokens=*" %%a in ('ver') do set "os_version=%%a"
-echo %GREEN%操作系统: %os_version%%NC%
-
-:: 检查处理器架构
-for /f "tokens=2 delims=:" %%a in ('wmic os get osarchitecture ^| findstr bit') do set "arch=%%a"
-echo %GREEN%处理器架构: %arch%%NC%
-
-:: 检查可用内存
-for /f "tokens=4" %%a in ('wmic ComputerSystem get TotalPhysicalMemory ^| findstr [0-9]') do set "total_mem=%%a"
-set /a "total_mem_mb=%total_mem% / 1024 / 1024"
-echo %GREEN%系统内存: %total_mem_mb% MB%NC%
-
-:: 检查磁盘空间
-for /f "tokens=3" %%a in ('dir /-c . ^| findstr "bytes free"') do set "free_space=%%a"
-echo %GREEN%可用磁盘空间: %free_space% bytes%NC%
-
-:: 检查网络连接
-echo %BLUE%正在检查网络连接...%NC%
-ping -n 1 google.com >nul 2>&1
+:: 检查操作系统版本
+ver | findstr /i "5\." > nul
 if %ERRORLEVEL% EQU 0 (
-    echo %GREEN%网络连接: 可用%NC%
-    
-    :: 检查更新
-    call :check_update
-) else (
-    ping -n 1 baidu.com >nul 2>&1
-    if %ERRORLEVEL% EQU 0 (
-        echo %GREEN%网络连接: 可用%NC%
-        
-        :: 检查更新
-        call :check_update
-    ) else (
-        echo %YELLOW%网络连接: 不可用%NC%
-        echo %YELLOW%无法检查更新。%NC%
+    echo %RED%警告: 检测到Windows XP。此工具可能无法在Windows XP上正常运行。%NC%
+    echo %YELLOW%建议使用Windows 7或更高版本。%NC%
+    echo %YELLOW%是否继续? (y/n)%NC%
+    set /p "continue_anyway=>"
+    if /i NOT "!continue_anyway!"=="y" (
+        echo %YELLOW%按任意键退出...%NC%
+        pause >nul
+        exit /b 1
     )
+)
+
+ver | findstr /i "6\.0" > nul
+if %ERRORLEVEL% EQU 0 (
+    echo %YELLOW%检测到Windows Vista。某些功能可能受限。%NC%
+)
+
+ver | findstr /i "6\.1" > nul
+if %ERRORLEVEL% EQU 0 (
+    echo %GREEN%检测到Windows 7。%NC%
+)
+
+ver | findstr /i "6\.[2-3]" > nul
+if %ERRORLEVEL% EQU 0 (
+    echo %GREEN%检测到Windows 8/8.1。%NC%
+)
+
+ver | findstr /i "10\.0" > nul
+if %ERRORLEVEL% EQU 0 (
+    echo %GREEN%检测到Windows 10。%NC%
+)
+
+ver | findstr /i "11\.0" > nul
+if %ERRORLEVEL% EQU 0 (
+    echo %GREEN%检测到Windows 11。%NC%
+)
+
+:: 检查PowerShell是否可用
+where powershell >nul 2>&1
+if %ERRORLEVEL% EQU 0 (
+    echo %GREEN%PowerShell可用。%NC%
+) else (
+    echo %RED%警告: PowerShell不可用。某些功能可能无法正常工作。%NC%
 )
 
 goto :eof
