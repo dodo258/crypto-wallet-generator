@@ -10,7 +10,7 @@ set "RED=[91m"
 set "NC=[0m"
 
 :: 版本信息
-set "VERSION=1.1.0"
+set "VERSION=1.2.0"
 
 :: 清屏
 cls
@@ -23,6 +23,15 @@ echo %BLUE%版本: %VERSION%%NC%
 echo.
 echo %BLUE%该工具可以帮助您生成符合BIP-39标准的加密货币钱包助记词%NC%
 echo.
+
+:: 主函数
+:main
+:: 检查Python
+call :check_python
+
+:: 运行主菜单
+call :show_menu
+goto :eof
 
 :: 检查更新
 :check_update
@@ -64,7 +73,7 @@ if %ERRORLEVEL% EQU 0 (
     )
 )
 
-:: 检查Python是否安装
+:: 检查Python
 :check_python
 python --version >nul 2>&1
 if %ERRORLEVEL% NEQ 0 (
@@ -108,6 +117,7 @@ if %python_major% LSS 3 (
 ) else (
     echo %GREEN%检测到Python版本 %python_version%%NC%
 )
+goto :eof
 
 :: 检查依赖库是否安装
 :check_dependencies
@@ -118,7 +128,7 @@ set "install_missing=0"
 echo %BLUE%正在检查依赖库...%NC%
 
 :: 尝试使用依赖管理器
-python -c "import sys; sys.path.insert(0, os.getcwd()); try: from utils.dependency_manager import 依赖管理器; print('DEPENDENCY_MANAGER_AVAILABLE'); except Exception as e: print(f'DEPENDENCY_MANAGER_NOT_AVAILABLE: {e}');" 2>nul | findstr "DEPENDENCY_MANAGER_AVAILABLE" >nul
+python -c "import sys, os; sys.path.insert(0, os.getcwd()); try: from utils.dependency_manager import 依赖管理器; print('DEPENDENCY_MANAGER_AVAILABLE'); except Exception as e: print(f'DEPENDENCY_MANAGER_NOT_AVAILABLE: {e}');" 2>nul | findstr "DEPENDENCY_MANAGER_AVAILABLE" >nul
 if %ERRORLEVEL% EQU 0 (
     echo %GREEN%使用依赖管理器检查依赖...%NC%
     
@@ -241,21 +251,29 @@ echo %YELLOW%2. 高安全标准版本%NC% - 提供多源熵、内存安全处理
 echo %YELLOW%3. 安装依赖%NC% - 安装运行工具所需的依赖库
 echo %YELLOW%4. 检查系统环境%NC% - 检查系统环境并诊断问题
 echo %YELLOW%5. 退出%NC%
-echo %YELLOW%0. 返回上一步%NC%
+echo %YELLOW%0. 帮助信息%NC%
 echo.
 echo %BLUE%请输入选项 (0-5):%NC%
 set /p "choice=>"
 
 if "%choice%"=="0" (
-    :: 返回上一步，重新显示菜单
+    :: 显示帮助信息
     cls
     echo %GREEN%================================================%NC%
-    echo %GREEN%    加密货币钱包助记词生成工具 - Windows版    %NC%
+    echo %GREEN%    加密货币钱包助记词生成工具 - 帮助信息    %NC%
     echo %GREEN%================================================%NC%
     echo %BLUE%版本: %VERSION%%NC%
     echo.
     echo %BLUE%该工具可以帮助您生成符合BIP-39标准的加密货币钱包助记词%NC%
     echo.
+    echo %YELLOW%使用说明:%NC%
+    echo 1. 基础版本适合简单使用，生成标准BIP-39助记词
+    echo 2. 高安全标准版本提供更多安全特性，推荐用于重要钱包
+    echo 3. 首次使用请先安装依赖
+    echo 4. 如遇问题，可使用系统环境检查功能诊断
+    echo.
+    echo %YELLOW%按任意键返回主菜单...%NC%
+    pause >nul
     goto :show_menu
 ) else if "%choice%"=="1" (
     call :check_dependencies "requirements.txt"
@@ -317,13 +335,3 @@ echo.
 echo %GREEN%程序已结束。按任意键退出...%NC%
 pause >nul
 exit /b 0
-
-:: 检查Python
-call :check_python
-
-:: 运行主菜单
-call :show_menu
-goto :eof
-
-:: 执行主程序
-call :main
