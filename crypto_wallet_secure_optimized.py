@@ -723,8 +723,10 @@ def 是否使用密码短语() -> Tuple[bool, str]:
     显示安全提示("密码短语")
     
     while True:
-        选择 = input("\n是否使用密码短语(passphrase)? (y/n/0): ").lower()
-        if 选择 == "0":
+        选择 = input("\n是否使用密码短语(passphrase)? (y/n/0) [n]: ").lower()
+        if 选择 == "":  # 用户直接按回车，默认选择n
+            return False, ""
+        elif 选择 == "0":
             print("返回上一步...")
             return False, "RETURN"  # 返回特殊标记表示返回上一步
         elif 选择 in ['y', 'yes', '是']:
