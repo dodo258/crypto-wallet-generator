@@ -4,11 +4,10 @@
 
 ## 项目概述
 
-本项目提供了三个版本的钱包助记词生成工具：
+本项目提供了两个版本的钱包助记词生成工具：
 
-1. **基础版本** (`crypto_wallet_generator.py`) - 基本的BIP-39助记词生成功能
-2. **中文界面版本** (`crypto_wallet_cn_optimized.py`) - 提供中文界面，但只生成英文助记词
-3. **高安全标准版本** (`crypto_wallet_secure_optimized.py`) - 提供多源熵、内存安全处理、SLIP-39分割备份等高级安全特性
+1. **基础版本** (`crypto_wallet_generator.py`) - 基本的BIP-39助记词生成功能（建议只生成一次性钱包使用）
+2. **高安全标准版本** (`crypto_wallet_secure_optimized.py`) - 提供多源熵、内存安全处理、SLIP-39分割备份等高级安全特性
 
 ## 快速启动
 
@@ -41,8 +40,7 @@ chmod +x run_wallet_generator.sh
 
 1. 自动检查Python环境和依赖库
 2. 提供简单的菜单系统，可以选择：
-   - 基础版本 - 简单的命令行工具
-   - 中文界面版本 - 提供中文交互界面
+   - 基础版本 - 简单的命令行工具（建议只生成一次性钱包使用）
    - 高安全标准版本 - 提供高级安全特性
    - 安装依赖 - 安装运行工具所需的依赖库
 
@@ -58,7 +56,6 @@ chmod +x run_wallet_generator.sh
 - **系统安全检查**：检测运行环境的安全状态
 - **离线使用支持**：推荐并支持在离线环境中使用
 - **密码强度检查**：评估密码短语的强度并提供改进建议
-- **二维码生成**：将助记词或种子转换为二维码，便于安全备份
 - **钱包地址生成**：从助记词生成常见加密货币的钱包地址
 - **配置文件支持**：允许用户自定义设置和偏好
 - **备份提醒机制**：定期提醒用户验证备份，确保资产安全
@@ -69,14 +66,14 @@ chmod +x run_wallet_generator.sh
 2. 安装依赖库：
 
 ```bash
-# 基础版本和中文版本
+# 基础版本
 pip install -r requirements.txt
 
 # 高安全标准版本（包含SLIP-39支持）
 pip install -r requirements_secure.txt
 
-# 安装额外功能的依赖（二维码生成、钱包地址生成等）
-pip install qrcode[pil] pillow hdwallet base58 bech32 ecdsa
+# 安装额外功能的依赖（钱包地址生成等）
+pip install hdwallet base58 bech32 ecdsa
 ```
 
 ## 使用方法
@@ -87,16 +84,6 @@ pip install qrcode[pil] pillow hdwallet base58 bech32 ecdsa
 python crypto_wallet_generator.py generate  # 生成助记词
 python crypto_wallet_generator.py verify "your mnemonic words here"  # 验证助记词
 ```
-
-### 中文界面版本
-
-```bash
-python crypto_wallet_cn_optimized.py
-```
-
-通过交互式菜单选择功能：
-1. 生成新的钱包助记词
-2. 验证助记词是否有效
 
 ### 高安全标准版本
 
