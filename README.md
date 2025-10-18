@@ -12,19 +12,35 @@
 
 ## 快速启动
 
-为了方便用户使用，我们提供了一个用户友好的启动脚本 `run_wallet_generator.sh`，即使是小白用户也可以轻松使用：
+为了方便不同平台的用户使用，我们提供了针对Windows和Mac的专用启动脚本，即使是小白用户也可以轻松使用：
 
-1. 确保脚本有执行权限：
-   ```bash
-   chmod +x run_wallet_generator.sh
-   ```
+### Windows用户
 
-2. 运行启动脚本：
-   ```bash
-   ./run_wallet_generator.sh
-   ```
+直接双击运行 `run_wallet_generator_windows.bat` 文件即可启动程序。
 
-3. 在菜单中选择想要使用的版本：
+### Mac用户
+
+直接双击运行 `run_wallet_generator_mac.command` 文件即可启动程序。
+
+如果首次运行提示没有权限，请在终端中执行以下命令：
+```bash
+chmod +x run_wallet_generator_mac.command
+```
+
+### Linux用户
+
+使用以下命令运行启动脚本：
+```bash
+chmod +x run_wallet_generator.sh
+./run_wallet_generator.sh
+```
+
+### 功能说明
+
+所有平台的启动脚本都提供以下功能：
+
+1. 自动检查Python环境和依赖库
+2. 提供简单的菜单系统，可以选择：
    - 基础版本 - 简单的命令行工具
    - 中文界面版本 - 提供中文交互界面
    - 高安全标准版本 - 提供高级安全特性
