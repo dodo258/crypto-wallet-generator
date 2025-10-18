@@ -35,6 +35,41 @@ check_dependencies() {
     
     echo -e "${BLUE}正在检查依赖库...${NC}"
     
+    # 尝试使用依赖管理器
+    if python3 -c "import sys, os; sys.path.insert(0, os.getcwd()); try: from utils.dependency_manager import 依赖管理器; print('DEPENDENCY_MANAGER_AVAILABLE'); except Exception as e: print(f'DEPENDENCY_MANAGER_NOT_AVAILABLE: {e}');" 2>/dev/null | grep -q "DEPENDENCY_MANAGER_AVAILABLE"; then
+        echo -e "${GREEN}使用依赖管理器检查依赖...${NC}"
+        
+        # 显示依赖状态
+        python3 -c "import sys, os; sys.path.insert(0, os.getcwd()); from utils.dependency_manager import 依赖管理器; print(依赖管理器.显示依赖状态())"
+        
+        # 询问是否安装缺失依赖
+        echo -e "${YELLOW}是否自动安装缺失的依赖? (y/n)${NC}"
+        read -p "> " install_deps
+        
+        if [[ "$install_deps" =~ ^[Yy]$ ]]; then
+            echo -e "${BLUE}正在安装依赖...${NC}"
+            
+            # 安装依赖
+            if [ "$req_file" = "requirements.txt" ]; then
+                python3 -c "import sys, os; sys.path.insert(0, os.getcwd()); from utils.dependency_manager import 依赖管理器; 依赖管理器.安装所有基础依赖(True)"
+            elif [ "$req_file" = "requirements_secure.txt" ]; then
+                python3 -c "import sys, os; sys.path.insert(0, os.getcwd()); from utils.dependency_manager import 依赖管理器; 依赖管理器.安装所有依赖(True)"
+            else
+                python3 -c "import sys, os; sys.path.insert(0, os.getcwd()); from utils.dependency_manager import 依赖管理器; 依赖管理器.从文件安装依赖('$req_file', True)"
+            fi
+            
+            echo -e "${GREEN}依赖安装完成！${NC}"
+        else
+            echo -e "${RED}警告: 缺少必要的依赖库，程序可能无法正常运行。${NC}"
+            echo -e "${YELLOW}按任意键继续...${NC}"
+            read -n 1
+        fi
+        return
+    fi
+    
+    # 回退到传统方式检查依赖
+    echo -e "${YELLOW}依赖管理器不可用，使用传统方式检查依赖...${NC}"
+    
     # 读取依赖文件中的每一行
     while IFS= read -r line || [[ -n "$line" ]]; do
         # 跳过空行和注释

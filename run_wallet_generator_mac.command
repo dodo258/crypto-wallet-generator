@@ -127,7 +127,7 @@ check_permissions() {
         echo -e "${YELLOW}权限管理器不可用，使用传统方式检查权限...${NC}"
         
         # 检查脚本是否可执行
-        for script in crypto_wallet_generator.py crypto_wallet_cn_optimized.py crypto_wallet_secure_optimized.py run_wallet_generator.sh run_wallet_generator_mac.command; do
+        for script in crypto_wallet_generator.py crypto_wallet_secure_optimized.py run_wallet_generator.sh run_wallet_generator_mac.command; do
             if [ -f "$script" ]; then
                 if [ ! -x "$script" ]; then
                     echo -e "${YELLOW}脚本 $script 不可执行，尝试添加执行权限...${NC}"

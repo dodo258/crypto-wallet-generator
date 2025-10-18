@@ -118,12 +118,12 @@ set "install_missing=0"
 echo %BLUE%正在检查依赖库...%NC%
 
 :: 尝试使用依赖管理器
-python -c "import sys; sys.path.insert(0, '.'); try: from utils.dependency_manager import 依赖管理器; print('DEPENDENCY_MANAGER_AVAILABLE'); except: print('DEPENDENCY_MANAGER_NOT_AVAILABLE')" 2>nul | findstr "DEPENDENCY_MANAGER_AVAILABLE" >nul
+python -c "import sys; sys.path.insert(0, os.getcwd()); try: from utils.dependency_manager import 依赖管理器; print('DEPENDENCY_MANAGER_AVAILABLE'); except Exception as e: print(f'DEPENDENCY_MANAGER_NOT_AVAILABLE: {e}');" 2>nul | findstr "DEPENDENCY_MANAGER_AVAILABLE" >nul
 if %ERRORLEVEL% EQU 0 (
     echo %GREEN%使用依赖管理器检查依赖...%NC%
     
     :: 显示依赖状态
-    python -c "import sys; sys.path.insert(0, '.'); from utils.dependency_manager import 依赖管理器; print(依赖管理器.显示依赖状态())"
+    python -c "import sys, os; sys.path.insert(0, os.getcwd()); from utils.dependency_manager import 依赖管理器; print(依赖管理器.显示依赖状态())"
     
     :: 询问是否安装缺失依赖
     echo %YELLOW%是否自动安装缺失的依赖? (y/n)%NC%
@@ -134,11 +134,11 @@ if %ERRORLEVEL% EQU 0 (
         
         :: 安装依赖
         if "%req_file%"=="requirements.txt" (
-            python -c "import sys; sys.path.insert(0, '.'); from utils.dependency_manager import 依赖管理器; 依赖管理器.安装所有基础依赖()"
+            python -c "import sys, os; sys.path.insert(0, os.getcwd()); from utils.dependency_manager import 依赖管理器; 依赖管理器.安装所有基础依赖()"
         ) else if "%req_file%"=="requirements_secure.txt" (
-            python -c "import sys; sys.path.insert(0, '.'); from utils.dependency_manager import 依赖管理器; 依赖管理器.安装所有依赖()"
+            python -c "import sys, os; sys.path.insert(0, os.getcwd()); from utils.dependency_manager import 依赖管理器; 依赖管理器.安装所有依赖()"
         ) else (
-            python -c "import sys; sys.path.insert(0, '.'); from utils.dependency_manager import 依赖管理器; 依赖管理器.从文件安装依赖('%req_file%')"
+            python -c "import sys, os; sys.path.insert(0, os.getcwd()); from utils.dependency_manager import 依赖管理器; 依赖管理器.从文件安装依赖('%req_file%')"
         )
         
         set "install_missing=1"
