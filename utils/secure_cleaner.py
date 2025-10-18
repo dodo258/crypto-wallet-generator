@@ -28,16 +28,24 @@ class 安全清除工具:
             数据: 要清除的数据对象
         """
         if isinstance(数据, bytes):
-            # 对于字节类型，用多次覆盖
+            # 对于字节类型，用0覆盖
+            # 注意：bytes对象是不可变的，无法直接修改
+            # 只能通过ctypes进行底层操作
+            长度 = len(数据)
+            ctypes.memset(ctypes.cast(数据, ctypes.POINTER(ctypes.c_char)), 0, 长度)
+        elif isinstance(数据, bytearray):
+            # 对于bytearray，可以直接修改
             长度 = len(数据)
             # 先用0覆盖
-            ctypes.memset(ctypes.cast(数据, ctypes.POINTER(ctypes.c_char)), 0, 长度)
+            for i in range(长度):
+                数据[i] = 0
             # 再用随机数据覆盖
             随机数据 = os.urandom(长度)
             for i in range(长度):
-                数据[i:i+1] = 随机数据[i:i+1]
+                数据[i] = 随机数据[i]
             # 最后再次用0覆盖
-            ctypes.memset(ctypes.cast(数据, ctypes.POINTER(ctypes.c_char)), 0, 长度)
+            for i in range(长度):
+                数据[i] = 0
         elif isinstance(数据, str):
             # 对于字符串，无法直接覆盖，但可以尝试删除引用
             数据 = None
@@ -102,8 +110,13 @@ class 安全清除工具:
                 try:
                     # 需要root权限，可能会失败
                     subprocess.run(["sync"], check=False)
-                    subprocess.run(["echo", "3", ">", "/proc/sys/vm/drop_caches"], 
-                                  shell=True, check=False)
+                    # 使用更安全的方式清除缓存，避免shell注入
+                    with open("/proc/sys/vm/drop_caches", "w") as f:
+                        try:
+                            f.write("3")
+                        except PermissionError:
+                            # 如果没有权限，则静默失败
+                            pass
                 except:
                     pass
             elif platform.system() == "Darwin":  # macOS
@@ -136,8 +149,17 @@ class 安全清除工具:
             if hasattr(sys, "intern"):
                 sys.intern = lambda x: x
             
-            # 尝试清除导入缓存
-            sys.modules.clear()
+            # 尝试清除部分导入缓存（不清除所有模块，避免破坏程序）
+            非必要模块 = []
+            for 模块名 in list(sys.modules.keys()):
+                # 只清除非内置模块和非当前程序必要模块
+                if not 模块名.startswith('_') and 模块名 not in ['sys', 'os', 'gc', 'ctypes', 'platform', 'tempfile', 'subprocess']:
+                    非必要模块.append(模块名)
+            
+            # 安全地移除非必要模块
+            for 模块名 in 非必要模块:
+                if 模块名 in sys.modules:
+                    del sys.modules[模块名]
             
             return True
         except Exception as e:
