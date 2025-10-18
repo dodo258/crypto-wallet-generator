@@ -236,17 +236,29 @@ goto :eof
 echo.
 echo %BLUE%请选择要使用的版本:%NC%
 echo.
-echo %YELLOW%1. 基础版本%NC% - 简单的命令行工具，支持基本的助记词生成功能
+echo %YELLOW%1. 基础版本%NC% - 简单的命令行工具，支持基本的助记词生成功能 %RED%(建议只生成一次性钱包使用)%NC%
 echo %YELLOW%2. 中文界面版本%NC% - 提供中文交互界面，适合中文用户使用
 echo %YELLOW%3. 高安全标准版本%NC% - 提供多源熵、内存安全处理、SLIP-39分割备份等高级安全特性
 echo %YELLOW%4. 安装依赖%NC% - 安装运行工具所需的依赖库
 echo %YELLOW%5. 检查系统环境%NC% - 检查系统环境并诊断问题
 echo %YELLOW%6. 退出%NC%
+echo %YELLOW%0. 返回上一步%NC%
 echo.
-echo %BLUE%请输入选项 (1-6):%NC%
+echo %BLUE%请输入选项 (0-6):%NC%
 set /p "choice=>"
 
-if "%choice%"=="1" (
+if "%choice%"=="0" (
+    :: 返回上一步，重新显示菜单
+    cls
+    echo %GREEN%================================================%NC%
+    echo %GREEN%    加密货币钱包助记词生成工具 - Windows版    %NC%
+    echo %GREEN%================================================%NC%
+    echo %BLUE%版本: %VERSION%%NC%
+    echo.
+    echo %BLUE%该工具可以帮助您生成符合BIP-39标准的加密货币钱包助记词%NC%
+    echo.
+    goto :show_menu
+) else if "%choice%"=="1" (
     call :check_dependencies "requirements.txt"
     echo %GREEN%启动基础版本...%NC%
     echo %YELLOW%提示: 使用 'python crypto_wallet_generator.py --help' 查看命令行参数%NC%

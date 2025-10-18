@@ -75,16 +75,28 @@ show_menu() {
     echo ""
     echo -e "${BLUE}请选择要使用的版本:${NC}"
     echo ""
-    echo -e "${YELLOW}1. 基础版本${NC} - 简单的命令行工具，支持基本的助记词生成功能"
+    echo -e "${YELLOW}1. 基础版本${NC} - 简单的命令行工具，支持基本的助记词生成功能 ${RED}(建议只生成一次性钱包使用)${NC}"
     echo -e "${YELLOW}2. 中文界面版本${NC} - 提供中文交互界面，适合中文用户使用"
     echo -e "${YELLOW}3. 高安全标准版本${NC} - 提供多源熵、内存安全处理、SLIP-39分割备份等高级安全特性"
     echo -e "${YELLOW}4. 安装依赖${NC} - 安装运行工具所需的依赖库"
     echo -e "${YELLOW}5. 退出${NC}"
+    echo -e "${YELLOW}0. 返回上一步${NC}"
     echo ""
-    echo -e "${BLUE}请输入选项 (1-5):${NC}"
+    echo -e "${BLUE}请输入选项 (0-5):${NC}"
     read -p "> " choice
     
     case $choice in
+        0)
+            # 返回上一步，重新显示菜单
+            clear
+            echo -e "${GREEN}================================================${NC}"
+            echo -e "${GREEN}    加密货币钱包助记词生成工具 - 启动器    ${NC}"
+            echo -e "${GREEN}================================================${NC}"
+            echo ""
+            echo -e "${BLUE}该工具可以帮助您生成符合BIP-39标准的加密货币钱包助记词${NC}"
+            echo ""
+            show_menu
+            ;;
         1)
             check_dependencies "requirements.txt"
             echo -e "${GREEN}启动基础版本...${NC}"
