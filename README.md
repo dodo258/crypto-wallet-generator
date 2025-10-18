@@ -121,6 +121,23 @@ python crypto_wallet_secure_optimized.py
 4. 恢复SLIP-39分割备份
 5. 检查系统安全状态
 
+### Windows可执行文件版本
+
+为了方便不熟悉Python的Windows用户，我们提供了将程序打包成可执行文件的方法：
+
+1. **下载预编译版本**：
+   - 您可以从[Releases页面](https://github.com/dodo258/crypto-wallet-generator/releases)下载最新的Windows可执行文件版本。
+   - 下载后解压，双击运行`启动钱包生成工具.bat`即可使用。
+
+2. **自行打包**：
+   - 如果您想自行打包，可以使用我们提供的打包脚本：
+   ```bash
+   # 在Windows系统上运行
+   python build_exe.py
+   ```
+   - 打包完成后，可执行文件将位于`dist`目录中。
+   - 也可以使用生成的ZIP文件`crypto_wallet_generator_windows.zip`。
+
 ### SLIP-39分割备份详细说明
 
 SLIP-39（Shamir's Secret Sharing for Mnemonic Codes）是一种高级备份方法，允许您将助记词分割成多个部分，并且只需要部分碎片就能恢复完整的助记词。这种方法基于Shamir的秘密共享算法，提供了额外的安全性和冗余性。
