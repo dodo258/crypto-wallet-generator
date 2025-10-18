@@ -2,8 +2,12 @@
 # -*- coding: utf-8 -*-
 
 """
-加密货币钱包助记词生成工具
-使用真随机熵源生成符合BIP39标准的助记词
+加密货币钱包助记词生成工具 - 基础版本
+提供基本的BIP-39助记词生成功能
+
+作者: Crypto Wallet Generator Team
+版本: 1.2.0
+许可证: MIT
 """
 
 import os
