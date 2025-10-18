@@ -24,7 +24,21 @@
 
 ### Windows用户
 
-直接双击运行 `run_wallet_generator_windows.bat` 文件即可启动程序。
+有两种方式启动程序：
+
+1. **批处理方式**：直接双击运行 `run_wallet_generator_windows.bat` 文件即可启动程序。
+
+2. **PowerShell方式**（推荐）：右键点击 `run_wallet_generator.ps1` 文件，选择"使用PowerShell运行"。
+   - 如果遇到安全策略限制，可以在PowerShell中执行以下命令：
+   ```powershell
+   Set-ExecutionPolicy -ExecutionPolicy Bypass -Scope Process
+   .\run_wallet_generator.ps1
+   ```
+
+如果遇到依赖库问题，可以使用专门的依赖安装脚本：
+```powershell
+.\install_dependencies.ps1
+```
 
 ### Mac用户
 
