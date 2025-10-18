@@ -11,6 +11,9 @@ YELLOW='\033[1;33m'
 RED='\033[0;31m'
 NC='\033[0m' # 无颜色
 
+# 版本信息
+VERSION="1.1.0"
+
 # 清屏
 clear
 
@@ -18,59 +21,199 @@ clear
 echo -e "${GREEN}================================================${NC}"
 echo -e "${GREEN}    加密货币钱包助记词生成工具 - Mac版    ${NC}"
 echo -e "${GREEN}================================================${NC}"
+echo -e "${BLUE}版本: ${VERSION}${NC}"
 echo ""
 echo -e "${BLUE}该工具可以帮助您生成符合BIP-39标准的加密货币钱包助记词${NC}"
 echo ""
 
+# 检查更新
+check_update() {
+    echo -e "${BLUE}正在检查更新...${NC}"
+    
+    # 尝试导入版本检查器模块
+    if python3 -c "from utils.version_checker import 版本检查器; 有更新, 版本信息 = 版本检查器.检查更新(); print('UPDATE_AVAILABLE' if 有更新 else 'UP_TO_DATE')" 2>/dev/null | grep -q "UPDATE_AVAILABLE"; then
+        echo -e "${YELLOW}发现新版本!${NC}"
+        
+        # 获取更新信息
+        python3 -c "from utils.version_checker import 版本检查器; 有更新, 版本信息 = 版本检查器.检查更新(); print(版本检查器.格式化更新提示(版本信息))"
+        
+        echo -e "${YELLOW}是否尝试自动更新? (y/n)${NC}"
+        read -p "> " auto_update
+        
+        if [[ "$auto_update" =~ ^[Yy]$ ]]; then
+            echo -e "${BLUE}正在尝试自动更新...${NC}"
+            
+            # 尝试自动更新
+            if python3 -c "from utils.version_checker import 版本检查器; 成功, 信息 = 版本检查器.自动更新(); print('UPDATE_SUCCESS' if 成功 else 'UPDATE_FAILED'); print(信息)" | grep -q "UPDATE_SUCCESS"; then
+                echo -e "${GREEN}更新成功!${NC}"
+                echo -e "${YELLOW}请重新启动程序以应用更新。${NC}"
+                echo -e "${YELLOW}按任意键退出...${NC}"
+                read -n 1
+                exit 0
+            else
+                echo -e "${RED}自动更新失败。${NC}"
+                echo -e "${YELLOW}请访问 https://github.com/dodo258/crypto-wallet-generator 手动更新。${NC}"
+            fi
+        fi
+    else
+        echo -e "${GREEN}已经是最新版本。${NC}"
+    fi
+}
+
 # 检查Python是否安装
-if ! command -v python3 &> /dev/null; then
-    echo -e "${RED}错误: 未找到Python3。请先安装Python3后再运行此脚本。${NC}"
-    echo "您可以从 https://www.python.org/downloads/ 下载并安装Python3。"
-    echo ""
-    echo -e "${YELLOW}按回车键退出...${NC}"
-    read
-    exit 1
-fi
+check_python() {
+    if ! command -v python3 &> /dev/null; then
+        echo -e "${RED}错误: 未找到Python3。请先安装Python3后再运行此脚本。${NC}"
+        echo "您可以从 https://www.python.org/downloads/ 下载并安装Python3。"
+        echo ""
+        echo -e "${YELLOW}按回车键退出...${NC}"
+        read
+        exit 1
+    fi
+    
+    # 检查Python版本
+    python_version=$(python3 --version | awk '{print $2}')
+    python_major=$(echo $python_version | cut -d. -f1)
+    python_minor=$(echo $python_version | cut -d. -f2)
+    
+    if [ "$python_major" -lt 3 ] || ([ "$python_major" -eq 3 ] && [ "$python_minor" -lt 7 ]); then
+        echo -e "${RED}警告: 检测到Python版本 ${python_version}${NC}"
+        echo -e "${RED}此工具需要Python 3.7或更高版本。${NC}"
+        echo -e "${YELLOW}是否继续? (y/n)${NC}"
+        read -p "> " continue_anyway
+        
+        if [[ ! "$continue_anyway" =~ ^[Yy]$ ]]; then
+            echo -e "${YELLOW}按回车键退出...${NC}"
+            read
+            exit 1
+        fi
+    else
+        echo -e "${GREEN}检测到Python版本 ${python_version}${NC}"
+    fi
+}
 
 # 检查依赖库是否安装
 check_dependencies() {
     local req_file=$1
     local missing_deps=0
+    local install_missing=0
     
     echo -e "${BLUE}正在检查依赖库...${NC}"
     
-    # 读取依赖文件中的每一行
-    while IFS= read -r line || [[ -n "$line" ]]; do
-        # 跳过空行和注释
-        [[ -z "$line" || "$line" =~ ^#.*$ ]] && continue
+    # 尝试使用依赖管理器
+    if python3 -c "import sys; sys.path.insert(0, '.'); from utils.dependency_manager import 依赖管理器; print('DEPENDENCY_MANAGER_AVAILABLE')" 2>/dev/null | grep -q "DEPENDENCY_MANAGER_AVAILABLE"; then
+        echo -e "${GREEN}使用依赖管理器检查依赖...${NC}"
         
-        # 提取包名（去掉版本号）
-        package=$(echo "$line" | cut -d'>' -f1 | cut -d'=' -f1 | cut -d'<' -f1 | tr -d ' ')
+        # 显示依赖状态
+        python3 -c "import sys; sys.path.insert(0, '.'); from utils.dependency_manager import 依赖管理器; print(依赖管理器.显示依赖状态())"
         
-        # 检查包是否已安装
-        if ! python3 -c "import $package" &> /dev/null; then
-            echo -e "${YELLOW}未安装: $package${NC}"
-            missing_deps=1
-        fi
-    done < "$req_file"
-    
-    # 如果有缺失的依赖，提示安装
-    if [ $missing_deps -eq 1 ]; then
-        echo ""
-        echo -e "${YELLOW}检测到缺少依赖库。是否要安装？(y/n)${NC}"
+        # 询问是否安装缺失依赖
+        echo -e "${YELLOW}是否自动安装缺失的依赖? (y/n)${NC}"
         read -p "> " install_deps
         
         if [[ "$install_deps" =~ ^[Yy]$ ]]; then
-            echo -e "${BLUE}正在安装依赖库...${NC}"
-            pip3 install -r "$req_file"
-            echo -e "${GREEN}依赖库安装完成！${NC}"
+            echo -e "${BLUE}正在安装依赖...${NC}"
+            
+            # 安装依赖
+            if [ "$req_file" = "requirements.txt" ]; then
+                python3 -c "import sys; sys.path.insert(0, '.'); from utils.dependency_manager import 依赖管理器; 依赖管理器.安装所有基础依赖()"
+            elif [ "$req_file" = "requirements_secure.txt" ]; then
+                python3 -c "import sys; sys.path.insert(0, '.'); from utils.dependency_manager import 依赖管理器; 依赖管理器.安装所有依赖()"
+            else
+                python3 -c "import sys; sys.path.insert(0, '.'); from utils.dependency_manager import 依赖管理器; 依赖管理器.从文件安装依赖('$req_file')"
+            fi
+            
+            install_missing=1
+            echo -e "${GREEN}依赖安装完成！${NC}"
         else
             echo -e "${RED}警告: 缺少必要的依赖库，程序可能无法正常运行。${NC}"
             echo -e "${YELLOW}按回车键继续...${NC}"
             read
         fi
     else
-        echo -e "${GREEN}所有依赖库已安装！${NC}"
+        # 回退到传统方式检查依赖
+        echo -e "${YELLOW}依赖管理器不可用，使用传统方式检查依赖...${NC}"
+        
+        # 读取依赖文件中的每一行
+        while IFS= read -r line || [[ -n "$line" ]]; do
+            # 跳过空行和注释
+            [[ -z "$line" || "$line" =~ ^#.*$ ]] && continue
+            
+            # 提取包名（去掉版本号）
+            package=$(echo "$line" | cut -d'>' -f1 | cut -d'=' -f1 | cut -d'<' -f1 | tr -d ' ')
+            
+            # 检查包是否已安装
+            if ! python3 -c "import $package" &> /dev/null; then
+                echo -e "${YELLOW}未安装: $package${NC}"
+                missing_deps=1
+            fi
+        done < "$req_file"
+        
+        # 如果有缺失的依赖，提示安装
+        if [ $missing_deps -eq 1 ]; then
+            echo ""
+            echo -e "${YELLOW}检测到缺少依赖库。是否要自动安装？(y/n)${NC}"
+            read -p "> " install_deps
+            
+            if [[ "$install_deps" =~ ^[Yy]$ ]]; then
+                echo -e "${BLUE}正在安装依赖库...${NC}"
+                pip3 install -r "$req_file"
+                install_missing=1
+                echo -e "${GREEN}依赖库安装完成！${NC}"
+            else
+                echo -e "${RED}警告: 缺少必要的依赖库，程序可能无法正常运行。${NC}"
+                echo -e "${YELLOW}按回车键继续...${NC}"
+                read
+            fi
+        else
+            echo -e "${GREEN}所有依赖库已安装！${NC}"
+        fi
+    fi
+    
+    return $install_missing
+}
+
+# 检查系统环境
+check_system() {
+    echo -e "${BLUE}正在检查系统环境...${NC}"
+    
+    # 检查操作系统
+    os_name=$(uname -s)
+    os_version=$(uname -r)
+    echo -e "${GREEN}操作系统: ${os_name} ${os_version}${NC}"
+    
+    # 检查处理器架构
+    arch=$(uname -m)
+    echo -e "${GREEN}处理器架构: ${arch}${NC}"
+    
+    # 检查可用内存
+    if [ "$os_name" = "Darwin" ]; then
+        # macOS
+        total_mem=$(sysctl -n hw.memsize)
+        total_mem_mb=$((total_mem / 1024 / 1024))
+        echo -e "${GREEN}系统内存: ${total_mem_mb} MB${NC}"
+    elif [ "$os_name" = "Linux" ]; then
+        # Linux
+        total_mem=$(grep MemTotal /proc/meminfo | awk '{print $2}')
+        total_mem_mb=$((total_mem / 1024))
+        echo -e "${GREEN}系统内存: ${total_mem_mb} MB${NC}"
+    fi
+    
+    # 检查磁盘空间
+    df_output=$(df -h . | tail -n 1)
+    available_space=$(echo $df_output | awk '{print $4}')
+    echo -e "${GREEN}可用磁盘空间: ${available_space}${NC}"
+    
+    # 检查网络连接
+    echo -e "${BLUE}正在检查网络连接...${NC}"
+    if ping -c 1 google.com &> /dev/null || ping -c 1 baidu.com &> /dev/null; then
+        echo -e "${GREEN}网络连接: 可用${NC}"
+        
+        # 检查更新
+        check_update
+    else
+        echo -e "${YELLOW}网络连接: 不可用${NC}"
+        echo -e "${YELLOW}无法检查更新。${NC}"
     fi
 }
 
@@ -83,9 +226,10 @@ show_menu() {
     echo -e "${YELLOW}2. 中文界面版本${NC} - 提供中文交互界面，适合中文用户使用"
     echo -e "${YELLOW}3. 高安全标准版本${NC} - 提供多源熵、内存安全处理、SLIP-39分割备份等高级安全特性"
     echo -e "${YELLOW}4. 安装依赖${NC} - 安装运行工具所需的依赖库"
-    echo -e "${YELLOW}5. 退出${NC}"
+    echo -e "${YELLOW}5. 检查系统环境${NC} - 检查系统环境并诊断问题"
+    echo -e "${YELLOW}6. 退出${NC}"
     echo ""
-    echo -e "${BLUE}请输入选项 (1-5):${NC}"
+    echo -e "${BLUE}请输入选项 (1-6):${NC}"
     read -p "> " choice
     
     case $choice in
@@ -144,6 +288,12 @@ show_menu() {
             show_menu
             ;;
         5)
+            check_system
+            echo -e "${YELLOW}按回车键返回主菜单...${NC}"
+            read
+            show_menu
+            ;;
+        6)
             echo -e "${GREEN}感谢使用！再见！${NC}"
             exit 0
             ;;
@@ -153,6 +303,9 @@ show_menu() {
             ;;
     esac
 }
+
+# 检查Python
+check_python
 
 # 运行主菜单
 show_menu
