@@ -103,9 +103,13 @@ class 二维码生成器:
         
         # 如果有标题，添加标题
         if 标题:
+            # 获取二维码图像尺寸
+            二维码宽度 = img.width
+            二维码高度 = img.height
+            
             # 创建一个新的白色背景图像，高度增加以容纳标题
             标题高度 = 40  # 标题区域高度
-            新图像 = Image.new('RGB', (img.width, img.height + 标题高度), color='white')
+            新图像 = Image.new('RGB', (二维码宽度, 二维码高度 + 标题高度), color='white')
             
             # 将二维码图像粘贴到新图像的底部
             新图像.paste(img, (0, 标题高度))
@@ -163,15 +167,35 @@ class 二维码生成器:
             如果文件路径为None，则返回二维码图像的base64编码
             如果文件路径不为None，则返回保存的文件路径
         """
-        return 二维码生成器.生成二维码(
-            数据=助记词,
-            文件路径=文件路径,
-            标题="钱包助记词",
-            错误纠正级别='H',  # 使用最高级别的错误纠正
-            盒子大小=10,
-            边框大小=4,
-            样式化=True
+        # 简化二维码生成，不使用标题
+        if not QRCODE_AVAILABLE:
+            print(f"错误: {二维码生成器.安装依赖提示()}")
+            return None
+        
+        # 创建QR码实例
+        qr = qrcode.QRCode(
+            version=None,  # 自动确定版本
+            error_correction=qrcode.constants.ERROR_CORRECT_H,
+            box_size=10,
+            border=4,
         )
+        
+        # 添加数据
+        qr.add_data(助记词)
+        qr.make(fit=True)
+        
+        # 创建图像
+        img = qr.make_image(fill_color="black", back_color="white")
+        
+        # 保存或返回图像
+        if 文件路径:
+            img.save(文件路径)
+            return 文件路径
+        else:
+            # 返回图像数据
+            img_byte_arr = io.BytesIO()
+            img.save(img_byte_arr, format='PNG')
+            return base64.b64encode(img_byte_arr.getvalue()).decode('utf-8')
     
     @staticmethod
     def 生成种子二维码(种子: bytes, 文件路径: Optional[str] = None) -> Union[str, bytes, None]:
@@ -187,15 +211,36 @@ class 二维码生成器:
             如果文件路径不为None，则返回保存的文件路径
         """
         种子十六进制 = 种子.hex()
-        return 二维码生成器.生成二维码(
-            数据=种子十六进制,
-            文件路径=文件路径,
-            标题="钱包种子(十六进制)",
-            错误纠正级别='H',  # 使用最高级别的错误纠正
-            盒子大小=6,  # 种子较长，使用较小的盒子大小
-            边框大小=4,
-            样式化=True
+        
+        # 简化二维码生成，不使用标题
+        if not QRCODE_AVAILABLE:
+            print(f"错误: {二维码生成器.安装依赖提示()}")
+            return None
+        
+        # 创建QR码实例
+        qr = qrcode.QRCode(
+            version=None,  # 自动确定版本
+            error_correction=qrcode.constants.ERROR_CORRECT_H,
+            box_size=6,  # 种子较长，使用较小的盒子大小
+            border=4,
         )
+        
+        # 添加数据
+        qr.add_data(种子十六进制)
+        qr.make(fit=True)
+        
+        # 创建图像
+        img = qr.make_image(fill_color="black", back_color="white")
+        
+        # 保存或返回图像
+        if 文件路径:
+            img.save(文件路径)
+            return 文件路径
+        else:
+            # 返回图像数据
+            img_byte_arr = io.BytesIO()
+            img.save(img_byte_arr, format='PNG')
+            return base64.b64encode(img_byte_arr.getvalue()).decode('utf-8')
     
     @staticmethod
     def 显示二维码安全提示() -> str:
