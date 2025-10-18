@@ -42,18 +42,43 @@ try:
         SLIP39_AVAILABLE = True
     except ImportError:
         SLIP39_AVAILABLE = False
+        
+    # 尝试导入配置管理器
+    try:
+        from utils.config_manager import 配置管理器
+        CONFIG_AVAILABLE = True
+    except ImportError:
+        CONFIG_AVAILABLE = False
 except ImportError:
     print("错误: 缺少必要的依赖库。请运行: pip install cryptography mnemonic")
     print("如需SLIP-39支持，请运行: pip install shamir-mnemonic")
     sys.exit(1)
 
 
-# 安全常量
-DEFAULT_ENTROPY_BITS = 256  # 默认使用256位熵（24个词）
-MIN_ENTROPY_BITS = 128      # 最小允许128位熵（12个词）
-PBKDF2_ITERATIONS = 2048    # BIP-39标准迭代次数
-ENTROPY_SOURCES_REQUIRED = 3  # 要求至少3个熵源
-DEFAULT_LANGUAGE = "english"  # 默认使用英文助记词
+# 加载配置
+配置 = None
+if CONFIG_AVAILABLE:
+    try:
+        配置 = 配置管理器()
+        # 从配置中加载常量
+        DEFAULT_ENTROPY_BITS = 配置.获取配置("默认助记词长度", 256)
+        MIN_ENTROPY_BITS = 128
+        PBKDF2_ITERATIONS = 2048
+        ENTROPY_SOURCES_REQUIRED = 配置.获取配置("熵源要求数量", 3)
+        DEFAULT_LANGUAGE = 配置.获取配置("默认助记词语言", "english")
+    except Exception as e:
+        print(f"加载配置时出错: {str(e)}")
+        print("将使用默认配置")
+        CONFIG_AVAILABLE = False
+
+# 如果配置不可用，使用默认常量
+if not CONFIG_AVAILABLE:
+    # 安全常量
+    DEFAULT_ENTROPY_BITS = 256  # 默认使用256位熵（24个词）
+    MIN_ENTROPY_BITS = 128      # 最小允许128位熵（12个词）
+    PBKDF2_ITERATIONS = 2048    # BIP-39标准迭代次数
+    ENTROPY_SOURCES_REQUIRED = 3  # 要求至少3个熵源
+    DEFAULT_LANGUAGE = "english"  # 默认使用英文助记词
 
 
 class 安全工具:
@@ -582,6 +607,25 @@ def 是否使用密码短语() -> Tuple[bool, str]:
         if 选择 in ['y', 'yes', '是']:
             print("\n请输入密码短语 (将不会显示在屏幕上):")
             密码短语 = getpass.getpass()
+            
+            # 检查密码强度
+            try:
+                from utils.password_checker import 密码强度检查器
+                强度结果 = 密码强度检查器.检查密码强度(密码短语)
+                print(密码强度检查器.格式化输出密码强度(强度结果))
+                
+                if 强度结果["分数"] < 40:
+                    print("\n警告: 您的密码强度较弱，这可能会降低您钱包的安全性。")
+                    print("建议使用更强的密码短语。")
+                    
+                    print("\n是否要继续使用此密码短语? (y/n):")
+                    继续选择 = input("> ").lower()
+                    if 继续选择 not in ['y', 'yes', '是']:
+                        continue
+            except ImportError:
+                # 如果密码检查器不可用，继续执行
+                pass
+            
             print("请再次输入密码短语确认:")
             确认密码 = getpass.getpass()
             
@@ -620,6 +664,7 @@ def 生成新钱包() -> None:
         助记词 = 生成器.生成助记词(强度)
         
         # 如果使用密码短语，生成种子
+        种子 = None
         if 使用密码短语:
             种子 = 生成器.助记词转种子(助记词, 密码短语)
             种子十六进制 = 种子.hex()
@@ -632,6 +677,54 @@ def 生成新钱包() -> None:
         if 使用密码短语:
             print(f"使用了密码短语: 是")
             print(f"种子(十六进制): {种子十六进制[:16]}...{种子十六进制[-16:]}")
+        
+        # 询问是否生成二维码
+        try:
+            from utils.qrcode_generator import 二维码生成器
+            if 二维码生成器.检查依赖():
+                print("\n是否生成助记词的二维码? (y/n):")
+                生成二维码选择 = input("> ").lower()
+                
+                if 生成二维码选择 in ['y', 'yes', '是']:
+                    # 显示二维码安全提示
+                    print(二维码生成器.显示二维码安全提示())
+                    
+                    # 询问保存路径
+                    print("\n请输入保存二维码的文件路径 (留空则不保存到文件):")
+                    二维码路径 = input("> ").strip()
+                    
+                    if not 二维码路径:
+                        二维码路径 = None
+                    
+                    # 生成助记词二维码
+                    二维码结果 = 二维码生成器.生成助记词二维码(助记词, 二维码路径)
+                    
+                    if 二维码路径 and 二维码结果:
+                        print(f"\n二维码已保存到: {二维码结果}")
+                    
+                    # 如果有种子且用户需要，也生成种子二维码
+                    if 种子 is not None:
+                        print("\n是否也生成种子的二维码? (y/n):")
+                        生成种子二维码选择 = input("> ").lower()
+                        
+                        if 生成种子二维码选择 in ['y', 'yes', '是']:
+                            # 询问保存路径
+                            print("\n请输入保存种子二维码的文件路径 (留空则不保存到文件):")
+                            种子二维码路径 = input("> ").strip()
+                            
+                            if not 种子二维码路径:
+                                种子二维码路径 = None
+                            
+                            # 生成种子二维码
+                            种子二维码结果 = 二维码生成器.生成种子二维码(种子, 种子二维码路径)
+                            
+                            if 种子二维码路径 and 种子二维码结果:
+                                print(f"\n种子二维码已保存到: {种子二维码结果}")
+            else:
+                print(f"\n注意: 要生成二维码，{二维码生成器.安装依赖提示()}")
+        except ImportError:
+            # 如果二维码生成器不可用，跳过
+            pass
         
         显示安全提示("生成后")
         
@@ -679,6 +772,49 @@ def 验证助记词() -> None:
                 种子 = 生成器.助记词转种子(助记词, 密码短语)
                 种子十六进制 = 种子.hex()
                 print(f"\n种子(十六进制): {种子十六进制[:16]}...{种子十六进制[-16:]}")
+                
+                # 询问是否生成钱包地址
+                try:
+                    from utils.wallet_address import 钱包地址生成器
+                    if 钱包地址生成器.检查依赖():
+                        print("\n是否生成常见加密货币的钱包地址? (y/n):")
+                        生成地址选择 = input("> ").lower()
+                        
+                        if 生成地址选择 in ['y', 'yes', '是']:
+                            print("\n正在生成钱包地址，请稍候...")
+                            
+                            # 显示地址安全提示
+                            print(钱包地址生成器.显示地址安全提示())
+                            
+                            # 生成比特币地址
+                            比特币地址信息 = 钱包地址生成器.从助记词生成地址(助记词, 密码短语, "BTC")
+                            print(钱包地址生成器.格式化地址信息(比特币地址信息))
+                            
+                            # 生成以太坊地址
+                            以太坊地址信息 = 钱包地址生成器.从助记词生成地址(助记词, 密码短语, "ETH")
+                            print(钱包地址生成器.格式化地址信息(以太坊地址信息))
+                            
+                            # 询问是否生成更多币种的地址
+                            print("\n是否生成更多币种的钱包地址? (y/n):")
+                            更多地址选择 = input("> ").lower()
+                            
+                            if 更多地址选择 in ['y', 'yes', '是']:
+                                # 生成狗狗币地址
+                                狗狗币地址信息 = 钱包地址生成器.从助记词生成地址(助记词, 密码短语, "DOGE")
+                                print(钱包地址生成器.格式化地址信息(狗狗币地址信息))
+                                
+                                # 生成莱特币地址
+                                莱特币地址信息 = 钱包地址生成器.从助记词生成地址(助记词, 密码短语, "LTC")
+                                print(钱包地址生成器.格式化地址信息(莱特币地址信息))
+                                
+                                # 生成比特币现金地址
+                                比特币现金地址信息 = 钱包地址生成器.从助记词生成地址(助记词, 密码短语, "BCH")
+                                print(钱包地址生成器.格式化地址信息(比特币现金地址信息))
+                    else:
+                        print(f"\n注意: 要生成钱包地址，{钱包地址生成器.安装依赖提示()}")
+                except ImportError:
+                    # 如果钱包地址生成器不可用，跳过
+                    pass
                 
                 # 清除敏感数据
                 安全工具.安全清除内存(种子)
@@ -933,6 +1069,27 @@ def 检查系统安全状态() -> None:
 
 def 主程序() -> None:
     """主程序入口"""
+    # 检查备份提醒
+    if CONFIG_AVAILABLE and 配置:
+        if 配置.检查备份提醒():
+            print("\n===== 备份提醒 =====")
+            print("距离您上次备份钱包已经过去了一段时间。")
+            print("定期验证和更新您的备份是一个良好的安全习惯。")
+            print("请确保您的助记词备份安全且可访问。")
+            print("如果您已经验证了备份，请忽略此提醒。")
+            print()
+            
+            # 询问用户是否已验证备份
+            print("您是否已验证您的备份? (y/n):")
+            验证备份 = input("> ").lower()
+            if 验证备份 in ['y', 'yes', '是']:
+                配置.更新备份检查时间()
+                print("谢谢！我们已更新您的备份检查时间。")
+            else:
+                print("请尽快验证您的备份，以确保资产安全。")
+            
+            input("\n按回车键继续...")
+    
     while True:
         选择 = 显示菜单()
         
