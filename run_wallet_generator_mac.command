@@ -273,7 +273,7 @@ check_dependencies() {
             
             if [[ "$install_deps" =~ ^[Yy]$ ]]; then
                 echo -e "${BLUE}正在安装依赖库...${NC}"
-                pip3 install -r "$req_file"
+                pip3 install --no-warn-script-location -r "$req_file"
                 install_missing=1
                 echo -e "${GREEN}依赖库安装完成！${NC}"
             else

@@ -232,7 +232,7 @@ class 依赖管理器:
                 print(f"正在安装 {依赖规格}... (尝试 {尝试+1}/{重试次数})")
                 
                 # 构建安装命令
-                命令 = [sys.executable, "-m", "pip", "install", 依赖规格]
+                命令 = [sys.executable, "-m", "pip", "install", "--no-warn-script-location", 依赖规格]
                 
                 # 如果使用镜像源，添加镜像源参数
                 if 镜像源:
@@ -250,7 +250,7 @@ class 依赖管理器:
                 if 尝试 == 重试次数 - 1 and 镜像源 != 依赖管理器.镜像源列表[0]:
                     print(f"尝试使用官方源安装...")
                     try:
-                        命令 = [sys.executable, "-m", "pip", "install", 依赖规格]
+                        命令 = [sys.executable, "-m", "pip", "install", "--no-warn-script-location", 依赖规格]
                         subprocess.check_call(命令, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
                         return True
                     except subprocess.CalledProcessError:
@@ -427,7 +427,7 @@ class 依赖管理器:
             镜像源 = 依赖管理器.获取最佳镜像源() if 使用镜像源 else None
             
             # 构建安装命令
-            命令 = [sys.executable, "-m", "pip", "install", "-r", 文件路径]
+            命令 = [sys.executable, "-m", "pip", "install", "--no-warn-script-location", "-r", 文件路径]
             
             # 如果使用镜像源，添加镜像源参数
             if 镜像源:
@@ -444,7 +444,7 @@ class 依赖管理器:
             if 使用镜像源 and 镜像源 != 依赖管理器.镜像源列表[0]:
                 print(f"尝试使用官方源安装...")
                 try:
-                    命令 = [sys.executable, "-m", "pip", "install", "-r", 文件路径]
+                    命令 = [sys.executable, "-m", "pip", "install", "--no-warn-script-location", "-r", 文件路径]
                     subprocess.check_call(命令, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
                     return True
                 except subprocess.CalledProcessError:
