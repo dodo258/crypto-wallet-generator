@@ -74,7 +74,7 @@ class 二维码生成器:
         
         # 创建QR码实例
         qr = qrcode.QRCode(
-            version=1,
+            version=None,  # 自动确定版本
             error_correction=getattr(qrcode.constants, f'ERROR_CORRECT_{错误纠正级别}'),
             box_size=盒子大小,
             border=边框大小,
@@ -192,7 +192,7 @@ class 二维码生成器:
             文件路径=文件路径,
             标题="钱包种子(十六进制)",
             错误纠正级别='H',  # 使用最高级别的错误纠正
-            盒子大小=8,  # 种子较长，使用较小的盒子大小
+            盒子大小=6,  # 种子较长，使用较小的盒子大小
             边框大小=4,
             样式化=True
         )
