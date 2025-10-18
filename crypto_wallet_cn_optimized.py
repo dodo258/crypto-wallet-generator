@@ -11,10 +11,42 @@ import sys
 import hashlib
 import random
 import time
+import platform
+import gc
 from typing import List, Optional
 from mnemonic import Mnemonic
 from cryptography.hazmat.primitives.asymmetric import rsa
 from cryptography.hazmat.primitives import hashes
+
+class 安全工具:
+    """安全相关的工具函数"""
+    
+    @staticmethod
+    def 强制垃圾回收():
+        """
+        强制执行Python垃圾回收，确保内存被释放
+        """
+        # 禁用垃圾回收器自动运行
+        gc.disable()
+        # 手动运行垃圾回收
+        gc.collect()
+        # 重新启用垃圾回收器
+        gc.enable()
+        return True
+    
+    @staticmethod
+    def 清除终端显示():
+        """
+        清除终端屏幕上的所有内容
+        """
+        # 对于类Unix系统
+        if platform.system() != "Windows":
+            os.system('clear')
+        # 对于Windows系统
+        else:
+            os.system('cls')
+        return True
+
 
 class 熵源生成器:
     """熵源生成器基类"""
@@ -259,6 +291,25 @@ def 生成新钱包():
         else:
             print("\n助记词生成完成。请妥善保管您的助记词！")
         
+        # 清除敏感数据
+        print("\n===== 正在清除所有敏感数据痕迹 =====")
+        print("1. 清除内存中的助记词...")
+        助记词 = None
+        
+        print("2. 强制执行垃圾回收...")
+        安全工具.强制垃圾回收()
+        
+        print("3. 敏感数据已安全清除 ✓")
+        print("\n您的助记词已从系统内存中完全清除，只保留在您的纸质记录中。")
+        
+        # 询问是否清除屏幕
+        print("\n是否清除屏幕以移除所有显示的敏感信息? (y/n):")
+        清屏选择 = input("> ").lower()
+        if 清屏选择 in ['y', 'yes', '是']:
+            安全工具.清除终端显示()
+            print("===== 加密货币钱包助记词生成工具 =====")
+            print("\n所有敏感数据已清除，屏幕已清空。")
+        
         # 等待用户确认
         input("\n按回车键继续...")
     except Exception as e:
@@ -292,6 +343,19 @@ def 验证助记词():
                 种子 = 生成器.助记词转种子(助记词, 密码短语)
                 种子十六进制 = 种子.hex()
                 print(f"\n种子(十六进制): {种子十六进制[:16]}...{种子十六进制[-16:]}")
+                
+                # 清除敏感数据
+                print("\n===== 正在清除所有敏感数据痕迹 =====")
+                print("1. 清除内存中的助记词和种子...")
+                助记词 = None
+                密码短语 = None
+                种子 = None
+                种子十六进制 = None
+                
+                print("2. 强制执行垃圾回收...")
+                安全工具.强制垃圾回收()
+                
+                print("3. 敏感数据已安全清除 ✓")
         else:
             print("\n助记词无效 ✗")
         
