@@ -999,14 +999,41 @@ def 验证助记词() -> None:
 
 def 生成SLIP39分割() -> None:
     """生成SLIP-39分割备份"""
+    global SLIP39_AVAILABLE
+    
     if not SLIP39_AVAILABLE:
         print("\n错误: SLIP-39功能需要安装shamir-mnemonic库")
-        print("请运行: pip install shamir-mnemonic")
-        input("\n按回车键继续...")
-        return
+        print("正在尝试自动安装shamir-mnemonic库...")
+        
+        try:
+            import subprocess
+            result = subprocess.run([sys.executable, "-m", "pip", "install", "--upgrade", "shamir-mnemonic==0.2.2"], 
+                                   capture_output=True, text=True)
+            
+            if result.returncode == 0:
+                print("安装成功！正在导入shamir-mnemonic库...")
+                try:
+                    import shamir_mnemonic
+                    SLIP39_AVAILABLE = True
+                    print("shamir-mnemonic库导入成功！")
+                except ImportError:
+                    print("导入失败，请手动安装：pip install --upgrade shamir-mnemonic==0.2.2")
+                    input("\n按回车键继续...")
+                    return
+            else:
+                print(f"安装失败: {result.stderr}")
+                print("请手动运行: pip install --upgrade shamir-mnemonic==0.2.2")
+                input("\n按回车键继续...")
+                return
+        except Exception as e:
+            print(f"安装过程中出错: {str(e)}")
+            print("请手动运行: pip install --upgrade shamir-mnemonic==0.2.2")
+            input("\n按回车键继续...")
+            return
     
     try:
         # 测试shamir_mnemonic库是否可用
+        import shamir_mnemonic
         shamir_mnemonic.generate_mnemonics(
             group_threshold=1,
             groups=[(1, 1)],
@@ -1178,14 +1205,41 @@ def 生成SLIP39分割() -> None:
 
 def 恢复SLIP39分割() -> None:
     """恢复SLIP-39分割备份"""
+    global SLIP39_AVAILABLE
+    
     if not SLIP39_AVAILABLE:
         print("\n错误: SLIP-39功能需要安装shamir-mnemonic库")
-        print("请运行: pip install shamir-mnemonic")
-        input("\n按回车键继续...")
-        return
+        print("正在尝试自动安装shamir-mnemonic库...")
+        
+        try:
+            import subprocess
+            result = subprocess.run([sys.executable, "-m", "pip", "install", "--upgrade", "shamir-mnemonic==0.2.2"], 
+                                   capture_output=True, text=True)
+            
+            if result.returncode == 0:
+                print("安装成功！正在导入shamir-mnemonic库...")
+                try:
+                    import shamir_mnemonic
+                    SLIP39_AVAILABLE = True
+                    print("shamir-mnemonic库导入成功！")
+                except ImportError:
+                    print("导入失败，请手动安装：pip install --upgrade shamir-mnemonic==0.2.2")
+                    input("\n按回车键继续...")
+                    return
+            else:
+                print(f"安装失败: {result.stderr}")
+                print("请手动运行: pip install --upgrade shamir-mnemonic==0.2.2")
+                input("\n按回车键继续...")
+                return
+        except Exception as e:
+            print(f"安装过程中出错: {str(e)}")
+            print("请手动运行: pip install --upgrade shamir-mnemonic==0.2.2")
+            input("\n按回车键继续...")
+            return
     
     try:
         # 测试shamir_mnemonic库是否可用
+        import shamir_mnemonic
         shamir_mnemonic.generate_mnemonics(
             group_threshold=1,
             groups=[(1, 1)],
@@ -1273,6 +1327,42 @@ def 检查系统安全状态() -> None:
 
 def 主程序() -> None:
     """主程序入口"""
+    # 预加载常用模块，减少启动延迟
+    import threading
+    
+    # 在后台线程中预加载其他模块
+    def 预加载模块():
+        try:
+            import hashlib
+            import time
+            import secrets
+            import unicodedata
+            import getpass
+            import ctypes
+            import platform
+            import random
+            import json
+            from pathlib import Path
+            
+            # 预加载加密相关模块
+            from cryptography.hazmat.primitives.asymmetric import rsa
+            from cryptography.hazmat.primitives import hashes
+            from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
+            from cryptography.hazmat.primitives.ciphers.aead import AESGCM
+            from cryptography.hazmat.backends import default_backend
+            
+            # 预初始化熵池
+            熵生成器 = 熵源生成器()
+            熵生成器.收集系统熵()
+            熵生成器.收集Python安全熵()
+        except Exception:
+            pass
+    
+    # 启动预加载线程
+    预加载线程 = threading.Thread(target=预加载模块)
+    预加载线程.daemon = True
+    预加载线程.start()
+    
     # 检查备份提醒
     if CONFIG_AVAILABLE and 配置:
         if 配置.检查备份提醒():
