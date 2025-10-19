@@ -6,7 +6,7 @@
 提供多源熵收集、内存安全处理、SLIP-39分割备份等高级安全特性
 
 作者: Crypto Wallet Generator Team
-版本: 1.3.3
+版本: 1.3.4
 许可证: MIT
 """
 
@@ -15,6 +15,7 @@ import os
 import sys
 import time
 import threading
+import hashlib  # 确保hashlib被导入
 from typing import Dict, List, Tuple, Optional, Union, Any
 
 # 全局变量定义
@@ -35,7 +36,7 @@ def 预加载模块():
     
     try:
         # 预加载常用模块
-        import hashlib
+        import hashlib  # 确保hashlib被导入
         import secrets
         import unicodedata
         import getpass
@@ -589,6 +590,9 @@ class 钱包生成器:
             raise ValueError(f"熵的位数必须是32的倍数，范围是{MIN_ENTROPY_BITS}-256")
         
         print("\n开始收集熵源...")
+        
+        # 确保hashlib已导入
+        import hashlib
         
         # 收集所有可用熵
         self.熵源生成器.收集所有可用熵()
