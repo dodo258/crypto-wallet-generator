@@ -6,23 +6,76 @@
 提供多源熵收集、内存安全处理、SLIP-39分割备份等高级安全特性
 
 作者: Crypto Wallet Generator Team
-版本: 1.3.1
+版本: 1.3.2
 许可证: MIT
 """
 
+# 预加载基础模块，减少启动延迟
 import os
 import sys
-import hashlib
 import time
-import secrets
-import unicodedata
-import getpass
-import ctypes
-import platform
-import random
-import json
-from typing import List, Dict, Tuple, Optional, Union, Any
-from pathlib import Path
+import threading
+
+# 全局变量定义
+SLIP39_AVAILABLE = False
+CONFIG_AVAILABLE = False
+配置 = None
+
+# 默认配置
+DEFAULT_ENTROPY_BITS = 256  # 默认使用256位熵（24个词）
+MIN_ENTROPY_BITS = 128      # 最小允许128位熵（12个词）
+PBKDF2_ITERATIONS = 2048    # BIP-39标准迭代次数
+ENTROPY_SOURCES_REQUIRED = 3  # 要求至少3个熵源
+DEFAULT_LANGUAGE = "english"  # 默认使用英文助记词
+
+# 在后台线程中预加载其他模块
+def 预加载模块():
+    global SLIP39_AVAILABLE, CONFIG_AVAILABLE, 配置
+    
+    try:
+        # 预加载常用模块
+        import hashlib
+        import secrets
+        import unicodedata
+        import getpass
+        import ctypes
+        import platform
+        import random
+        import json
+        from pathlib import Path
+        
+        # 预加载加密相关模块
+        from mnemonic import Mnemonic
+        from cryptography.hazmat.primitives.asymmetric import rsa
+        from cryptography.hazmat.primitives import hashes
+        from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
+        from cryptography.hazmat.primitives.ciphers.aead import AESGCM
+        from cryptography.hazmat.backends import default_backend
+        
+        # 尝试导入SLIP-39库
+        try:
+            import shamir_mnemonic
+            SLIP39_AVAILABLE = True
+        except ImportError:
+            SLIP39_AVAILABLE = False
+        
+        # 尝试导入配置管理器
+        try:
+            from utils.config_manager import 配置管理器
+            CONFIG_AVAILABLE = True
+            配置 = 配置管理器()
+        except ImportError:
+            CONFIG_AVAILABLE = False
+    except Exception:
+        pass
+
+# 启动预加载线程
+预加载线程 = threading.Thread(target=预加载模块)
+预加载线程.daemon = True
+预加载线程.start()
+
+# 等待基本模块加载完成
+time.sleep(0.1)
 
 try:
     from mnemonic import Mnemonic
@@ -1327,41 +1380,8 @@ def 检查系统安全状态() -> None:
 
 def 主程序() -> None:
     """主程序入口"""
-    # 预加载常用模块，减少启动延迟
-    import threading
-    
-    # 在后台线程中预加载其他模块
-    def 预加载模块():
-        try:
-            import hashlib
-            import time
-            import secrets
-            import unicodedata
-            import getpass
-            import ctypes
-            import platform
-            import random
-            import json
-            from pathlib import Path
-            
-            # 预加载加密相关模块
-            from cryptography.hazmat.primitives.asymmetric import rsa
-            from cryptography.hazmat.primitives import hashes
-            from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
-            from cryptography.hazmat.primitives.ciphers.aead import AESGCM
-            from cryptography.hazmat.backends import default_backend
-            
-            # 预初始化熵池
-            熵生成器 = 熵源生成器()
-            熵生成器.收集系统熵()
-            熵生成器.收集Python安全熵()
-        except Exception:
-            pass
-    
-    # 启动预加载线程
-    预加载线程 = threading.Thread(target=预加载模块)
-    预加载线程.daemon = True
-    预加载线程.start()
+    # 显示启动信息
+    print("\n正在启动加密货币钱包助记词生成工具...")
     
     # 检查备份提醒
     if CONFIG_AVAILABLE and 配置:

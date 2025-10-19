@@ -1,5 +1,10 @@
 #!/bin/bash
 
+# 加密货币钱包助记词生成工具 - macOS启动脚本
+# 作者: Crypto Wallet Generator Team
+# 版本: 1.3.2
+# 许可证: MIT
+
 # 获取脚本所在目录
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 cd "$DIR"
@@ -12,7 +17,7 @@ RED='\033[0;31m'
 NC='\033[0m' # 无颜色
 
 # 版本信息
-VERSION="1.3.1"
+VERSION="1.3.2"
 
 # 清屏
 clear
@@ -25,6 +30,32 @@ echo -e "${BLUE}版本: ${VERSION}${NC}"
 echo ""
 echo -e "${BLUE}该工具可以帮助您生成符合BIP-39标准的加密货币钱包助记词${NC}"
 echo ""
+
+# 解决macOS未知开发者问题
+fix_macos_security() {
+    echo -e "${BLUE}正在设置macOS安全性...${NC}"
+    
+    # 检查是否需要移除quarantine属性
+    if xattr -l "$(which python3)" 2>/dev/null | grep -q "com.apple.quarantine"; then
+        echo -e "${YELLOW}检测到安全限制，正在移除...${NC}"
+        xattr -d com.apple.quarantine "$(which python3)" 2>/dev/null
+    fi
+    
+    # 移除当前目录下所有文件的quarantine属性
+    find . -type f -exec xattr -d com.apple.quarantine {} \; 2>/dev/null
+    
+    # 设置可执行权限
+    chmod +x crypto_wallet_secure_optimized.py
+    chmod +x crypto_wallet_generator.py
+    chmod +x run_wallet_generator_mac.command
+    
+    echo -e "${GREEN}安全设置完成！${NC}"
+}
+
+# 在macOS上运行安全设置
+if [[ "$OSTYPE" == "darwin"* ]]; then
+    fix_macos_security
+fi
 
 # 检查更新
 check_update() {
@@ -372,6 +403,15 @@ show_menu() {
         2)
             check_dependencies "requirements_secure.txt"
             echo -e "${GREEN}启动高安全标准版本...${NC}"
+            # 检查是否安装了必要的依赖
+            python3 -c "import sys; sys.exit(0 if all(map(__import__, ['cryptography', 'mnemonic'])) else 1)" 2>/dev/null
+            if [ $? -ne 0 ]; then
+                echo -e "${YELLOW}正在安装必要的依赖...${NC}"
+                pip3 install -r requirements.txt
+                pip3 install -r requirements_secure.txt
+                # 确保安装正确版本的shamir-mnemonic
+                pip3 install --upgrade shamir-mnemonic==0.2.2
+            fi
             python3 crypto_wallet_secure_optimized.py
             ;;
         3)
