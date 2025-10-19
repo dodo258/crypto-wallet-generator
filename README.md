@@ -49,7 +49,7 @@ chmod +x run_wallet_generator_linux.sh
 
 **强烈建议Windows用户：**
 - 安装VMware或VirtualBox等虚拟机软件
-- **强烈推荐使用Ubuntu 20.04 LTS桌面版**（稳定性好，兼容性最佳）
+- **强烈推荐使用Ubuntu 20.04 LTS或22.04 LTS桌面版**（稳定性好，兼容性最佳）
 - 确保虚拟机完全离线运行，提供最高级别的安全性
 
 这种方式可以提供一个隔离的、安全的环境，更适合处理加密货币钱包的敏感信息。
