@@ -140,30 +140,43 @@ python crypto_wallet_secure_optimized.py
 4. 恢复SLIP-39分割备份
 5. 检查系统安全状态
 
-### 打包为独立可执行文件
+### 自动打包与下载
 
-为了方便不熟悉Python的用户，我们提供了将程序打包成独立可执行文件的功能。打包后的程序不需要安装Python或任何依赖，可以直接运行。
+为了方便用户使用，我们提供了自动打包的可执行文件，可以直接从GitHub Releases页面下载使用。
 
-### 打包步骤
+### 下载地址
 
-1. 确保已安装Python 3.7或更高版本
-2. 运行打包脚本：
-   ```bash
-   python package_app.py
-   ```
-3. 脚本会自动安装PyInstaller（如果未安装）并打包程序
-4. 打包完成后，可执行文件和相关文件将位于`dist`目录中
-5. 同时会生成一个压缩包，可以直接分发给用户
+访问[GitHub Releases页面](https://github.com/dodo258/crypto-wallet-generator/releases)下载最新版本的可执行文件：
 
-### 使用打包后的程序
+- **Windows用户**：下载 `crypto_wallet_generator_windows.zip`
+- **macOS用户**：下载 `crypto_wallet_generator_macos.tar.gz`
+- **Linux用户**：下载 `crypto_wallet_generator_linux.tar.gz`
 
-1. 解压压缩包到任意位置
+### 使用方法
+
+1. 下载并解压缩文件
 2. 运行启动器：
-   - Windows: 双击`启动钱包生成工具.bat`
-   - macOS: 双击`启动钱包生成工具.command`
-   - Linux: 运行`./启动钱包生成工具.sh`
+   - Windows: 双击 `启动钱包生成工具.bat`
+   - macOS: 双击 `启动钱包生成工具.command`
+   - Linux: 运行 `./启动钱包生成工具.sh`
 
-打包后的程序包含所有必要的依赖，用户无需安装任何额外软件即可使用。
+### 注意事项
+
+- 打包好的程序包含所有依赖，无需安装Python或任何其他软件
+- 可以在完全离线的环境中使用
+- 建议在虚拟机或安全的离线环境中运行
+
+### 发布新版本
+
+如果您是项目维护者，可以通过以下步骤发布新版本：
+
+1. 创建新的版本标签：
+   ```bash
+   git tag v1.0.0  # 使用适当的版本号
+   git push origin v1.0.0
+   ```
+
+2. GitHub Actions会自动构建并发布可执行文件到Releases页面
 
 ### SLIP-39分割备份详细说明
 
