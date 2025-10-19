@@ -13,11 +13,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [windows-latest, macos-latest, ubuntu-latest]
+        os: [macos-latest, ubuntu-latest]
         include:
-          - os: windows-latest
-            asset_name: crypto_wallet_generator_windows
-            asset_extension: .zip
           - os: macos-latest
             asset_name: crypto_wallet_generator_macos
             asset_extension: .tar.gz
@@ -44,15 +41,10 @@ jobs:
 
     - name: Build with PyInstaller
       run: |
-        pyinstaller --onefile --clean --name=crypto_wallet_secure --add-data="utils:utils" crypto_wallet_secure_optimized.py
+        pyinstaller --onefile --clean --name=crypto_wallet_secure crypto_wallet_secure_optimized.py
+        # 复制utils目录到dist目录
+        cp -r utils dist/
       shell: bash
-
-    - name: Create launcher (Windows)
-      if: matrix.os == 'windows-latest'
-      run: |
-        echo '@echo off' > dist/启动钱包生成工具.bat
-        echo 'echo 正在启动加密货币钱包助记词生成工具...' >> dist/启动钱包生成工具.bat
-        echo 'start crypto_wallet_secure.exe' >> dist/启动钱包生成工具.bat
 
     - name: Create launcher (macOS)
       if: matrix.os == 'macos-latest'
@@ -86,9 +78,7 @@ jobs:
         echo "本程序用于安全生成和管理加密货币钱包助记词。" >> dist/使用说明.txt
         echo "" >> dist/使用说明.txt
         echo "使用方法：" >> dist/使用说明.txt
-        if [ "${{ matrix.os }}" = "windows-latest" ]; then
-          echo "1. 双击运行 '启动钱包生成工具.bat'" >> dist/使用说明.txt
-        elif [ "${{ matrix.os }}" = "macos-latest" ]; then
+        if [ "${{ matrix.os }}" = "macos-latest" ]; then
           echo "1. 双击运行 '启动钱包生成工具.command'" >> dist/使用说明.txt
         else
           echo "1. 运行 './启动钱包生成工具.sh'" >> dist/使用说明.txt
@@ -103,14 +93,7 @@ jobs:
         echo "详细文档请参阅 README.md 文件" >> dist/使用说明.txt
       shell: bash
 
-    - name: Create archive (Windows)
-      if: matrix.os == 'windows-latest'
-      run: |
-        cd dist
-        7z a -tzip ../${{ matrix.asset_name }}${{ matrix.asset_extension }} *
-
     - name: Create archive (macOS/Linux)
-      if: matrix.os != 'windows-latest'
       run: |
         cd dist
         tar -czvf ../${{ matrix.asset_name }}${{ matrix.asset_extension }} *
@@ -135,7 +118,6 @@ jobs:
         uses: softprops/action-gh-release@v1
         with:
           files: |
-            crypto_wallet_generator_windows/crypto_wallet_generator_windows.zip
             crypto_wallet_generator_macos/crypto_wallet_generator_macos.tar.gz
             crypto_wallet_generator_linux/crypto_wallet_generator_linux.tar.gz
           draft: false

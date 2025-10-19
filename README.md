@@ -148,7 +148,6 @@ python crypto_wallet_secure_optimized.py
 
 访问[GitHub Releases页面](https://github.com/dodo258/crypto-wallet-generator/releases)下载最新版本的可执行文件：
 
-- **Windows用户**：下载 `crypto_wallet_generator_windows.zip`
 - **macOS用户**：下载 `crypto_wallet_generator_macos.tar.gz`
 - **Linux用户**：下载 `crypto_wallet_generator_linux.tar.gz`
 
@@ -156,7 +155,6 @@ python crypto_wallet_secure_optimized.py
 
 1. 下载并解压缩文件
 2. 运行启动器：
-   - Windows: 双击 `启动钱包生成工具.bat`
    - macOS: 双击 `启动钱包生成工具.command`
    - Linux: 运行 `./启动钱包生成工具.sh`
 
