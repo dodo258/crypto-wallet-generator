@@ -56,10 +56,22 @@ chmod +x run_wallet_generator_linux.sh
 
 #### Ubuntu中的依赖安装说明
 
-在Ubuntu 20.04中安装依赖时，请按照程序提示进行操作：
+在Ubuntu 20.04/22.04中安装依赖时，请按照以下步骤操作：
 
-1. 运行启动脚本后，选择"安装依赖"选项
-2. 脚本会自动检测缺失的依赖并提示安装
+1. 首先运行自动安装脚本：
+   ```bash
+   python3 auto_install.py
+   ```
+   此脚本会自动检测系统环境，选择最佳镜像源，并安装所有必要的依赖。
+
+2. 如果自动安装失败，可以尝试手动安装：
+   ```bash
+   # 安装基础依赖
+   pip3 install -r requirements.txt
+   # 安装高级依赖
+   pip3 install -r requirements_secure.txt
+   ```
+
 3. 如果遇到任何问题，请按照错误提示进行操作
 
 如有任何疑问或遇到无法解决的问题，请在[GitHub仓库](https://github.com/dodo258/crypto-wallet-generator)提交Issue，我们会尽快回复并提供帮助。
