@@ -1063,6 +1063,11 @@ def 生成SLIP39分割() -> None:
         
         try:
             import subprocess
+            import sys
+            import os
+            
+            # 尝试使用pip安装
+            print("尝试方法1: 使用pip安装...")
             result = subprocess.run([sys.executable, "-m", "pip", "install", "--upgrade", "shamir-mnemonic==0.2.2"], 
                                    capture_output=True, text=True)
             
@@ -1073,14 +1078,51 @@ def 生成SLIP39分割() -> None:
                     SLIP39_AVAILABLE = True
                     print("shamir-mnemonic库导入成功！")
                 except ImportError:
-                    print("导入失败，请手动安装：pip install --upgrade shamir-mnemonic==0.2.2")
-                    input("\n按回车键继续...")
-                    return
+                    print("导入失败，尝试方法2...")
+                    
+                    # 尝试使用pip3安装
+                    print("尝试方法2: 使用pip3安装...")
+                    result = subprocess.run(["pip3", "install", "--upgrade", "shamir-mnemonic==0.2.2"], 
+                                          capture_output=True, text=True)
+                    
+                    if result.returncode == 0:
+                        print("安装成功！正在导入shamir-mnemonic库...")
+                        try:
+                            import shamir_mnemonic
+                            SLIP39_AVAILABLE = True
+                            print("shamir-mnemonic库导入成功！")
+                        except ImportError:
+                            print("导入失败，请手动安装：pip install --upgrade shamir-mnemonic==0.2.2")
+                            input("\n按回车键继续...")
+                            return
+                    else:
+                        print(f"安装失败: {result.stderr}")
+                        print("请手动运行: pip install --upgrade shamir-mnemonic==0.2.2")
+                        input("\n按回车键继续...")
+                        return
             else:
                 print(f"安装失败: {result.stderr}")
-                print("请手动运行: pip install --upgrade shamir-mnemonic==0.2.2")
-                input("\n按回车键继续...")
-                return
+                print("尝试方法2: 使用pip3安装...")
+                
+                # 尝试使用pip3安装
+                result = subprocess.run(["pip3", "install", "--upgrade", "shamir-mnemonic==0.2.2"], 
+                                      capture_output=True, text=True)
+                
+                if result.returncode == 0:
+                    print("安装成功！正在导入shamir-mnemonic库...")
+                    try:
+                        import shamir_mnemonic
+                        SLIP39_AVAILABLE = True
+                        print("shamir-mnemonic库导入成功！")
+                    except ImportError:
+                        print("导入失败，请手动安装：pip install --upgrade shamir-mnemonic==0.2.2")
+                        input("\n按回车键继续...")
+                        return
+                else:
+                    print(f"安装失败: {result.stderr}")
+                    print("请手动运行: pip install --upgrade shamir-mnemonic==0.2.2")
+                    input("\n按回车键继续...")
+                    return
         except Exception as e:
             print(f"安装过程中出错: {str(e)}")
             print("请手动运行: pip install --upgrade shamir-mnemonic==0.2.2")
@@ -1090,12 +1132,29 @@ def 生成SLIP39分割() -> None:
     try:
         # 测试shamir_mnemonic库是否可用
         import shamir_mnemonic
-        shamir_mnemonic.generate_mnemonics(
-            group_threshold=1,
-            groups=[(1, 1)],
-            master_secret=b"test",
-            passphrase=b""
-        )
+        
+        # 检查shamir_mnemonic库的版本
+        try:
+            version = shamir_mnemonic.__version__
+            print(f"shamir-mnemonic库版本: {version}")
+        except AttributeError:
+            print("无法获取shamir-mnemonic库版本")
+        
+        # 测试生成功能
+        try:
+            test_result = shamir_mnemonic.generate_mnemonics(
+                group_threshold=1,
+                groups=[(1, 1)],
+                master_secret=b"test" * 4,  # 16字节的测试数据
+                passphrase=b""
+            )
+            print("shamir-mnemonic库测试成功！")
+        except Exception as e:
+            print(f"\n错误: shamir-mnemonic库无法正常工作: {str(e)}")
+            print("请确保安装了正确版本的shamir-mnemonic库")
+            print("建议运行: pip install --upgrade shamir-mnemonic==0.2.2")
+            input("\n按回车键继续...")
+            return
     except Exception as e:
         print(f"\n错误: shamir-mnemonic库无法正常工作: {str(e)}")
         print("请确保安装了正确版本的shamir-mnemonic库")
@@ -1269,6 +1328,11 @@ def 恢复SLIP39分割() -> None:
         
         try:
             import subprocess
+            import sys
+            import os
+            
+            # 尝试使用pip安装
+            print("尝试方法1: 使用pip安装...")
             result = subprocess.run([sys.executable, "-m", "pip", "install", "--upgrade", "shamir-mnemonic==0.2.2"], 
                                    capture_output=True, text=True)
             
@@ -1279,14 +1343,51 @@ def 恢复SLIP39分割() -> None:
                     SLIP39_AVAILABLE = True
                     print("shamir-mnemonic库导入成功！")
                 except ImportError:
-                    print("导入失败，请手动安装：pip install --upgrade shamir-mnemonic==0.2.2")
-                    input("\n按回车键继续...")
-                    return
+                    print("导入失败，尝试方法2...")
+                    
+                    # 尝试使用pip3安装
+                    print("尝试方法2: 使用pip3安装...")
+                    result = subprocess.run(["pip3", "install", "--upgrade", "shamir-mnemonic==0.2.2"], 
+                                          capture_output=True, text=True)
+                    
+                    if result.returncode == 0:
+                        print("安装成功！正在导入shamir-mnemonic库...")
+                        try:
+                            import shamir_mnemonic
+                            SLIP39_AVAILABLE = True
+                            print("shamir-mnemonic库导入成功！")
+                        except ImportError:
+                            print("导入失败，请手动安装：pip install --upgrade shamir-mnemonic==0.2.2")
+                            input("\n按回车键继续...")
+                            return
+                    else:
+                        print(f"安装失败: {result.stderr}")
+                        print("请手动运行: pip install --upgrade shamir-mnemonic==0.2.2")
+                        input("\n按回车键继续...")
+                        return
             else:
                 print(f"安装失败: {result.stderr}")
-                print("请手动运行: pip install --upgrade shamir-mnemonic==0.2.2")
-                input("\n按回车键继续...")
-                return
+                print("尝试方法2: 使用pip3安装...")
+                
+                # 尝试使用pip3安装
+                result = subprocess.run(["pip3", "install", "--upgrade", "shamir-mnemonic==0.2.2"], 
+                                      capture_output=True, text=True)
+                
+                if result.returncode == 0:
+                    print("安装成功！正在导入shamir-mnemonic库...")
+                    try:
+                        import shamir_mnemonic
+                        SLIP39_AVAILABLE = True
+                        print("shamir-mnemonic库导入成功！")
+                    except ImportError:
+                        print("导入失败，请手动安装：pip install --upgrade shamir-mnemonic==0.2.2")
+                        input("\n按回车键继续...")
+                        return
+                else:
+                    print(f"安装失败: {result.stderr}")
+                    print("请手动运行: pip install --upgrade shamir-mnemonic==0.2.2")
+                    input("\n按回车键继续...")
+                    return
         except Exception as e:
             print(f"安装过程中出错: {str(e)}")
             print("请手动运行: pip install --upgrade shamir-mnemonic==0.2.2")
@@ -1296,17 +1397,41 @@ def 恢复SLIP39分割() -> None:
     try:
         # 测试shamir_mnemonic库是否可用
         import shamir_mnemonic
-        shamir_mnemonic.generate_mnemonics(
-            group_threshold=1,
-            groups=[(1, 1)],
-            master_secret=b"test",
-            passphrase=b""
-        )
+        
+        # 检查shamir_mnemonic库的版本
+        try:
+            version = shamir_mnemonic.__version__
+            print(f"shamir-mnemonic库版本: {version}")
+        except AttributeError:
+            print("无法获取shamir-mnemonic库版本")
+        
+        # 测试生成功能
+        try:
+            test_result = shamir_mnemonic.generate_mnemonics(
+                group_threshold=1,
+                groups=[(1, 1)],
+                master_secret=b"test" * 4,  # 16字节的测试数据
+                passphrase=b""
+            )
+            print("shamir-mnemonic库测试成功！")
+        except Exception as e:
+            print(f"\n错误: shamir-mnemonic库无法正常工作: {str(e)}")
+            print("请确保安装了正确版本的shamir-mnemonic库")
+            print("建议运行: pip install --upgrade shamir-mnemonic==0.2.2")
+            input("\n按回车键继续...")
+            return
     except Exception as e:
         print(f"\n错误: shamir-mnemonic库无法正常工作: {str(e)}")
         print("请确保安装了正确版本的shamir-mnemonic库")
         print("建议运行: pip install --upgrade shamir-mnemonic==0.2.2")
         input("\n按回车键继续...")
+        return
+    
+    显示安全提示("SLIP39恢复")
+    
+    # 询问是否使用密码短语
+    使用密码短语, 密码短语 = 是否使用密码短语()
+    if 密码短语 == "RETURN":  # 用户选择返回上一步
         return
     
     try:
