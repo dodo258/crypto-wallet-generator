@@ -1,2 +1,0 @@
-mnemonic>=0.20
-click>=8.1.0
