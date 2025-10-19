@@ -42,6 +42,10 @@ jobs:
         cp crypto_wallet_generator.py package/
         cp crypto_wallet_secure_optimized.py package/
         cp -r utils/* package/utils/
+        
+        # 复制shamir-mnemonic库的所有文件
+        python -c "import site, os, shutil, shamir_mnemonic; src = os.path.dirname(shamir_mnemonic.__file__); dst = os.path.join('package', 'shamir_mnemonic'); shutil.copytree(src, dst)"
+        
         cp README.md package/
         cp LICENSE package/
         cp run_wallet_generator_linux.sh package/

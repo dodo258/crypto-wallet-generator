@@ -40,6 +40,9 @@ jobs:
         pip install -r requirements_secure.txt
         # 确保安装正确版本的shamir-mnemonic
         pip install --upgrade shamir-mnemonic==0.2.2
+        
+        # 显示shamir_mnemonic库的位置和文件
+        python -c "import shamir_mnemonic, os; print(f'shamir_mnemonic location: {shamir_mnemonic.__file__}'); print('Files:'); [print(os.path.join(root, f)) for root, _, files in os.walk(os.path.dirname(shamir_mnemonic.__file__)) for f in files]"
 
     - name: List directory structure
       run: |
@@ -49,7 +52,23 @@ jobs:
 
     - name: Build with PyInstaller
       run: |
-        pyinstaller --onefile --clean --name=crypto_wallet_secure crypto_wallet_secure_optimized.py
+        # 创建PyInstaller钩子目录
+        mkdir -p hooks
+        
+        # 创建shamir_mnemonic钩子文件
+        cat > hooks/hook-shamir_mnemonic.py << 'EOF'
+        from PyInstaller.utils.hooks import collect_all
+        datas, binaries, hiddenimports = collect_all('shamir_mnemonic')
+        EOF
+        
+        # 使用--additional-hooks-dir和--collect-all确保包含所有依赖
+        pyinstaller --onefile --clean --name=crypto_wallet_secure --additional-hooks-dir=hooks --collect-all shamir_mnemonic crypto_wallet_secure_optimized.py
+        
+        # 复制utils目录到dist目录
+        cp -r utils dist/
+        
+        # 检查生成的可执行文件中是否包含shamir_mnemonic
+        strings dist/crypto_wallet_secure | grep -i shamir || echo "Warning: shamir_mnemonic not found in executable"
       shell: bash
 
     - name: Copy utils directory
