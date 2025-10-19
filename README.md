@@ -20,25 +20,7 @@
 
 ## 快速启动
 
-为了方便不同平台的用户使用，我们提供了针对Windows和Mac的专用启动脚本，即使是小白用户也可以轻松使用：
-
-### Windows用户
-
-有两种方式启动程序：
-
-1. **批处理方式**：直接双击运行 `run_wallet_generator_windows.bat` 文件即可启动程序。
-
-2. **PowerShell方式**（推荐）：右键点击 `run_wallet_generator.ps1` 文件，选择"使用PowerShell运行"。
-   - 如果遇到安全策略限制，可以在PowerShell中执行以下命令：
-   ```powershell
-   Set-ExecutionPolicy -ExecutionPolicy Bypass -Scope Process
-   .\run_wallet_generator.ps1
-   ```
-
-如果遇到依赖库问题，可以使用专门的依赖安装脚本：
-```powershell
-.\install_dependencies.ps1
-```
+为了方便不同平台的用户使用，我们提供了针对Mac和Linux的专用启动脚本：
 
 ### Mac用户
 
@@ -53,9 +35,24 @@ chmod +x run_wallet_generator_mac.command
 
 使用以下命令运行启动脚本：
 ```bash
-chmod +x run_wallet_generator.sh
-./run_wallet_generator.sh
+chmod +x run_wallet_generator_linux.sh
+./run_wallet_generator_linux.sh
 ```
+
+### Windows用户注意事项
+
+**本工具不推荐在Windows环境下直接使用**，因为：
+
+1. Windows环境可能存在安全隐患，不适合处理敏感的加密货币信息
+2. 某些依赖库在Windows上安装复杂，可能需要额外的编译工具
+3. 内存安全处理在Windows系统上的效果不如在Linux/Mac上理想
+
+**强烈建议Windows用户：**
+- 安装VMware或VirtualBox等虚拟机软件
+- 部署完全离线的Linux系统（如Ubuntu或Debian）
+- 在虚拟机中运行本工具，确保最高级别的安全性
+
+这种方式可以提供一个隔离的、安全的环境，更适合处理加密货币钱包的敏感信息。
 
 ### 功能说明
 
@@ -64,7 +61,7 @@ chmod +x run_wallet_generator.sh
 1. 自动检查Python环境和依赖库
 2. 提供简单的菜单系统，可以选择：
    - 基础版本 - 简单的命令行工具（建议只生成一次性钱包使用）
-   - 高安全标准版本 - 提供高级安全特性
+   - 高安全标准版本 - 提供多源熵、内存安全处理、SLIP-39分割备份等高级安全特性
    - 安装依赖 - 安装运行工具所需的依赖库
 
 启动脚本会自动检查环境和依赖，并提供友好的用户界面，非常适合不熟悉命令行的用户。
@@ -123,20 +120,9 @@ python crypto_wallet_secure_optimized.py
 
 ### Windows可执行文件版本
 
-为了方便不熟悉Python的Windows用户，我们提供了将程序打包成可执行文件的方法：
+**不再提供Windows可执行文件版本**
 
-1. **下载预编译版本**：
-   - 您可以从[Releases页面](https://github.com/dodo258/crypto-wallet-generator/releases)下载最新的Windows可执行文件版本。
-   - 下载后解压，双击运行`启动钱包生成工具.bat`即可使用。
-
-2. **自行打包**：
-   - 如果您想自行打包，可以使用我们提供的打包脚本：
-   ```bash
-   # 在Windows系统上运行
-   python build_exe.py
-   ```
-   - 打包完成后，可执行文件将位于`dist`目录中。
-   - 也可以使用生成的ZIP文件`crypto_wallet_generator_windows.zip`。
+出于安全考虑，我们不再提供Windows可执行文件版本。强烈建议Windows用户通过虚拟机使用Linux版本，以获得最佳的安全性和兼容性。
 
 ### SLIP-39分割备份详细说明
 
