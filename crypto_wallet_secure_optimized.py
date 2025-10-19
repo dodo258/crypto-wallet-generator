@@ -6,7 +6,7 @@
 提供多源熵收集、内存安全处理、SLIP-39分割备份等高级安全特性
 
 作者: Crypto Wallet Generator Team
-版本: 1.2.0
+版本: 1.3.1
 许可证: MIT
 """
 
@@ -1005,6 +1005,21 @@ def 生成SLIP39分割() -> None:
         input("\n按回车键继续...")
         return
     
+    try:
+        # 测试shamir_mnemonic库是否可用
+        shamir_mnemonic.generate_mnemonics(
+            group_threshold=1,
+            groups=[(1, 1)],
+            master_secret=b"test",
+            passphrase=b""
+        )
+    except Exception as e:
+        print(f"\n错误: shamir-mnemonic库无法正常工作: {str(e)}")
+        print("请确保安装了正确版本的shamir-mnemonic库")
+        print("建议运行: pip install --upgrade shamir-mnemonic==0.2.2")
+        input("\n按回车键继续...")
+        return
+    
     显示安全提示("SLIP39")
     
     # 询问是否使用密码短语
@@ -1166,6 +1181,21 @@ def 恢复SLIP39分割() -> None:
     if not SLIP39_AVAILABLE:
         print("\n错误: SLIP-39功能需要安装shamir-mnemonic库")
         print("请运行: pip install shamir-mnemonic")
+        input("\n按回车键继续...")
+        return
+    
+    try:
+        # 测试shamir_mnemonic库是否可用
+        shamir_mnemonic.generate_mnemonics(
+            group_threshold=1,
+            groups=[(1, 1)],
+            master_secret=b"test",
+            passphrase=b""
+        )
+    except Exception as e:
+        print(f"\n错误: shamir-mnemonic库无法正常工作: {str(e)}")
+        print("请确保安装了正确版本的shamir-mnemonic库")
+        print("建议运行: pip install --upgrade shamir-mnemonic==0.2.2")
         input("\n按回车键继续...")
         return
     

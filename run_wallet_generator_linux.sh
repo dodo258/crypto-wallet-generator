@@ -1,5 +1,10 @@
 #!/bin/bash
 
+# 加密货币钱包助记词生成工具 - Linux启动脚本
+# 作者: Crypto Wallet Generator Team
+# 版本: 1.3.1
+# 许可证: MIT
+
 # 设置终端颜色
 GREEN='\033[0;32m'
 BLUE='\033[0;34m'
@@ -8,7 +13,7 @@ RED='\033[0;31m'
 NC='\033[0m' # 无颜色
 
 # 版本信息
-VERSION="1.2.0"
+VERSION="1.3.1"
 
 # 清屏
 clear
@@ -164,11 +169,15 @@ show_menu() {
                     ;;
                 2)
                     pip3 install -r requirements_secure.txt
+                    # 确保安装正确版本的shamir-mnemonic
+                    pip3 install --upgrade shamir-mnemonic==0.2.2
                     echo -e "${GREEN}高安全标准版本依赖安装完成！${NC}"
                     ;;
                 3)
                     pip3 install -r requirements.txt
                     pip3 install -r requirements_secure.txt
+                    # 确保安装正确版本的shamir-mnemonic
+                    pip3 install --upgrade shamir-mnemonic==0.2.2
                     echo -e "${GREEN}所有依赖安装完成！${NC}"
                     ;;
                 4)

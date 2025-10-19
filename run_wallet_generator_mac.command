@@ -12,7 +12,7 @@ RED='\033[0;31m'
 NC='\033[0m' # 无颜色
 
 # 版本信息
-VERSION="1.1.0"
+VERSION="1.3.1"
 
 # 清屏
 clear
@@ -398,6 +398,8 @@ show_menu() {
                         python3 -c "import sys; sys.path.insert(0, '$(pwd)'); from utils.dependency_manager import 依赖管理器; 依赖管理器.安装所有依赖(True)"
                     else
                         pip3 install -r requirements_secure.txt
+                        # 确保安装正确版本的shamir-mnemonic
+                        pip3 install --upgrade shamir-mnemonic==0.2.2
                     fi
                     echo -e "${GREEN}高安全标准版本依赖安装完成！${NC}"
                     ;;
@@ -407,6 +409,8 @@ show_menu() {
                     else
                         pip3 install -r requirements.txt
                         pip3 install -r requirements_secure.txt
+                        # 确保安装正确版本的shamir-mnemonic
+                        pip3 install --upgrade shamir-mnemonic==0.2.2
                     fi
                     echo -e "${GREEN}所有依赖安装完成！${NC}"
                     ;;

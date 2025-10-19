@@ -38,6 +38,8 @@ jobs:
         pip install pyinstaller
         pip install -r requirements.txt
         pip install -r requirements_secure.txt
+        # 确保安装正确版本的shamir-mnemonic
+        pip install --upgrade shamir-mnemonic==0.2.2
 
     - name: List directory structure
       run: |
