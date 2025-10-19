@@ -6,7 +6,7 @@
 提供多源熵收集、内存安全处理、SLIP-39分割备份等高级安全特性
 
 作者: Crypto Wallet Generator Team
-版本: 1.3.2
+版本: 1.3.3
 许可证: MIT
 """
 
@@ -15,6 +15,7 @@ import os
 import sys
 import time
 import threading
+from typing import Dict, List, Tuple, Optional, Union, Any
 
 # 全局变量定义
 SLIP39_AVAILABLE = False
@@ -250,6 +251,8 @@ class 安全工具:
         返回:
             包含安全检查结果的字典
         """
+        import platform
+        
         结果 = {}
         
         # 检查是否为离线环境（简单检查，不完全可靠）
